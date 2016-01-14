@@ -18,7 +18,7 @@ function startingPlaceholderInit() {
     global_spacing = 0.9;  // variables declared with "var" are global
     vert_offset = 1;  // this could be useful later
     jitter_radius = 0.02;  // and this too
-
+    jitter_radius=0.2;
     my_object = {};  // objects can be created with braces
     my_object.university = "Michigan";  // create object property with an assignment
     my_object["department"] = "EECS";  // equivalent to my.object.department = "EECS";
@@ -73,28 +73,55 @@ function startingPlaceholderAnimate() {
     // HANDLE USER KEY INTERACTION
 
     // keyboard is threejs helper for reading keyboard state
+
     if (keyboard.pressed("x")) {
         textbar.innerHTML = "moving on up";  // make the pieces move up
-    // STENCIL: update the vertical offset variable
+	vert_offset=vert_offset+1;
+    }
+    else if (keyboard.pressed("d")) {
+        textbar.innerHTML = "moving on down";  // make the pieces move up
+	if (vert_offset>0){
+	vert_offset=vert_offset-1;
+    }
     }
     else if (keyboard.pressed("z")) {
-        textbar.innerHTML = "relax your mind, let your conscience be free";  // stop jittering the pieces
+    textbar.innerHTML = "relax your mind, let your conscience be free";  // stop jittering the pieces
     // STENCIL: update the radius of the jittering
+     jitter_radius=0;
+
+    }
+    else if (keyboard.pressed("r")) {
+    textbar.innerHTML = "resume jittering";  // stop jittering the pieces
+    // STENCIL: update the radius of the jittering
+     jitter_radius=0.2;
+
     }
     else if (keyboard.pressed("shift+1")) { 
         textbar.innerHTML = "get a move on";  // increase spacing
     // STENCIL: update the global spacing variable
+     global_spacing=global_spacing+1;
+
     }
     else if (keyboard.pressed("1")) {
         textbar.innerHTML = "come together";  // decrease spacing
     // STENCIL: update the global spacing variable
+    
+    	if (global_spacing>0){
+     	global_spacing=global_spacing-1;
     }
-    else {
+    }
+
+    else{
         // make the pieces jitter, and say something more interesting
         textbar.innerHTML = "Welcome to KinEval. I want to see some text. Can you place a message here?";  // set message text
-        vert_offset = 1;
-        jitter_radius = 0.2;
+   //     vert_offset = 1;
+   //     jitter_radius = 0.2;
+    
+
     }
+
+	console.log(jitter_radius);
+
 
     // CREATE TRANSFORMATION MATRIX
 
@@ -140,6 +167,8 @@ function startingPlaceholderAnimate() {
         jsmat[0][3] += global_spacing;
         robot.links[x].xform = matrix_copy(jsmat);
     } 
+
+	console.log(jitter_radius);
 
 } 
 
