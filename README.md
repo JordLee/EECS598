@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 KinEval
 =======
@@ -55,3 +56,6 @@ Open pendulum/pendularm.html in a browser.  Pendulum will servo to a set desired
 
 Open rrt/rrt_canvas.html in a browser.  Planner will execute automatically upon page load.  Other worlds can be used through uncomment/commenting lines in set_planning_scene().
 
+=======
+# EECS598
+>>>>>>> c1b7076b475bc82656a7da96fa370589f9cef93c
