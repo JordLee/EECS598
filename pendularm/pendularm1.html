@@ -55,6 +55,8 @@ function init() {
     // create pendulum object and its kinematic and dynamic parameters
     pendulum = {length:2.0, mass:2.0, angle:Math.PI/2, angle_dot:0.0, angle_previous:0};
 
+    
+    pendulum_2 = {length:2.0, mass:2.0, angle:Math.PI/2, angle_dot:0.0, angle_previous:0};
 
     // initialize pendulum controls
     pendulum.control = 0;
@@ -180,24 +182,56 @@ function animate() {
     // STENCIL: basic Verlet integration
 	if (ver_state == true){
 	console.log("initializing");
+
+	console.log(pendulum_2.angle);
 	pendulum.angle_previous = pendulum.angle;
-	pendulum.angle_dot_dot = -gravity/pendulum.length*Math.sin(pendulum.angle) + pendulum.control/(pendulum.mass*pendulum.length*pendulum.length);
-	pendulum.angle_init = pendulum.angle + pendulum.angle_dot*dt + 0.5*pendulum_acceleration(pendulum.angle,pendulum.control)*dt*dt;   
+	pendulum_2.angle_previous = pendulum_2.angle;
+//	pendulum.angle_dot_dot = -gravity/pendulum.length*Math.sin(pendulum.angle) + pendulum.control/(pendulum.mass*pendulum.length*pendulum.length);
+	
+
+	pendulum.angle_dot_dot = pendulum_acceleration(pendulum.angle,pendulum_2.angle,pendulum.angle_dot,pendulum_2.angle_dot,pendulum.control);
+	pendulum_2.angle_dot_dot = pendulum_2_acceleration(pendulum.angle,pendulum_2.angle,pendulum.angle_dot,pendulum_2.angle_dot,pendulum.control);
+
+	pendulum.angle_init = pendulum.angle + pendulum.angle_dot*dt + 0.5*pendulum.angle_dot_dot*dt*dt;   
+	pendulum_2.angle_init = pendulum_2.angle + pendulum_2.angle_dot*dt + 0.5*pendulum_2.angle_dot_dot*dt*dt;   	
+
 	pendulum.angle_current = pendulum.angle_init;
+	pendulum_2.angle_current = pendulum_2.angle_init;
+
 	pendulum.angle = 2*pendulum.angle_current - pendulum.angle_previous + pendulum.angle_dot_dot*dt*dt;
- 	pendulum.angle_dot = (pendulum.angle - pendulum.angle_previous)/(2*dt);
+	pendulum_2.angle = 2*pendulum_2.angle_current - pendulum_2.angle_previous + pendulum_2.angle_dot_dot*dt*dt;
+
+	pendulum.angle_dot = (pendulum.angle - pendulum.angle_previous)/(2*dt);
+	pendulum_2.angle_dot = (pendulum_2.angle - pendulum_2.angle_previous)/(2*dt);
+
 	ver_state = false;
+
+	console.log(pendulum.angle_dot);
+	console.log(pendulum.angle);
+
+
 	}
 	else if(ver_state == false){
 
 
 	pendulum.angle_previous = pendulum.angle_current;
 	pendulum.angle_current = pendulum.angle;
+	pendulum.angle_dot_current = pendulum.angle_dot;
+
+	pendulum_2.angle_previous = pendulum_2.angle_current;
+	pendulum_2.angle_current = pendulum_2.angle;
+	pendulum_2.angle_dot_current = pendulum_2.angle_dot;
+
 	//pendulum.angle_dot_dot = -gravity/pendulum.length*Math.sin(pendulum.angle) + pendulum.control/(pendulum.mass*pendulum.length*pendulum.length);
 	//pendulum.angle = pendulum.angle + pendulum.angle_dot*dt + 0.5*pendulum.angle_dot_dot*dt*dt;
 	
-	pendulum.angle = 2*pendulum.angle_current - pendulum.angle_previous + pendulum_acceleration(pendulum.angle,pendulum.control)*dt*dt;
+	pendulum.angle = 2*pendulum.angle_current - pendulum.angle_previous + pendulum_acceleration(pendulum.angle_current,pendulum_2.angle_current,pendulum.angle_dot_current,pendulum_2.angle_dot_current,pendulum.control)*dt*dt;
+
+	pendulum_2.angle = 2*pendulum_2.angle_current - pendulum_2.angle_previous + pendulum_2_acceleration(pendulum.angle_current,pendulum_2.angle_current,pendulum.angle_dot_current,pendulum_2.angle_dot_current,pendulum.control)*dt*dt;
+
 	pendulum.angle_dot = (pendulum.angle - pendulum.angle_previous)/(2*dt);
+	pendulum_2.angle_dot = (pendulum_2.angle - pendulum_2.angle_previous)/(2*dt);
+
 	}
 	//console.log(ver_state);
     }
@@ -205,13 +239,26 @@ function animate() {
 
     // STENCIL: a correct velocity Verlet integrator is REQUIRED for assignment
 	pendulum.angle_previous = pendulum.angle;
-	pendulum.angle_dot_dot_previous = -gravity/pendulum.length*Math.sin(pendulum.angle_previous) + pendulum.control/(pendulum.mass*pendulum.length*pendulum.length);
+	pendulum_2.angle_previous = pendulum_2.angle;
+
+//	pendulum.angle_dot_dot_previous = -gravity/pendulum.length*Math.sin(pendulum.angle_previous) + pendulum.control/(pendulum.mass*pendulum.length*pendulum.length);
+	
+	pendulum.angle_dot_dot_previous = pendulum_acceleration(pendulum.angle_previous,pendulum_2.angle_previous,pendulum.control);
+	pendulum_2.angle_dot_dot_previous = pendulum_2_acceleration(pendulum_2.angle_previous,pendulum.control);
+
 
 	pendulum.angle = pendulum.angle_previous + pendulum.angle_dot*dt + 0.5*pendulum.angle_dot_dot_previous*dt*dt;
+	pendulum_2.angle = pendulum_2.angle_previous + pendulum_2.angle_dot*dt + 0.5*pendulum_2.angle_dot_dot_previous*dt*dt;
+
 	//pendulum.angle_dot_dot = -gravity/pendulum.length*Math.sin(pendulum.angle) + pendulum.control/(pendulum.mass*pendulum.length*pendulum.length);
 
-	pendulum.angle_dot_dot = pendulum_acceleration(pendulum.angle,pendulum.control);
+	pendulum.angle_dot_dot = pendulum_acceleration(pendulum.angle,pendulum_2.angle,pendulum.control);
+	pendulum_2.angle_dot_dot = pendulum_2_acceleration(pendulum_2.angle,pendulum.control);
+
+
 	pendulum.angle_dot = pendulum.angle_dot + (pendulum.angle_dot_dot_previous + pendulum.angle_dot_dot)*0.5*dt;
+	pendulum_2.angle_dot = pendulum_2.angle_dot + (pendulum_2.angle_dot_dot_previous + pendulum_2.angle_dot_dot)*0.5*dt;
+
 
 
     }
@@ -219,31 +266,73 @@ function animate() {
 
     // STENCIL: Runge-Kutta 4 integrator
 	var a21 = 0.5, a32 = 0.5, a43 = 1, c1 = 0, c2 = 0.5, c3 = 0.5, c4 = 1, b1 = 1/6,  b2 = 1/3, b3 = 1/3, b4 = 1/6; 
-
+	var x2=0,x3=0,x4=0,v2=0,v3=0,v4=0,X2=0,X3=0,X4=0,V2=0,V3=0,V4=0;
 	pendulum.angle_previous = pendulum.angle;
-	
+	pendulum_2.angle_previous = pendulum_2.angle;	
 //	var pendulum.angle_previous = pendulum.angle_dot;
 
 	 x1= pendulum.angle;
 	 v1 = pendulum.angle_dot; 
+
+	 X1= pendulum_2.angle;
+	 V1 = pendulum_2.angle_dot;
+ 
+	 X2 = X1 + (a21 * V1 * dt);
+//	console.log(x2);
+	 //V2 = V1 + (a21 * pendulum_2_acceleration(X1, pendulum.control) * dt);
+//	 X3 = X1 + (a32 * V2 * dt);
+//	 V3 = V1 + (a32 * pendulum_2_acceleration(X2, pendulum.control) * dt );
+//	 X4 = X1 + (a43 * V3 * dt);
+//	 V4 = V1 + (a43 * pendulum_2_acceleration(X3, pendulum.control) * dt ); 
+
+	 V2 = V1 + (a21 * pendulum_2_acceleration(x1,X1,v1,V1, pendulum.control) * dt);
+	 X3 = X1 + (a32 * V2 * dt);
+	 V3 = V1 + (a32 * pendulum_2_acceleration(x2,X2,v2,V2, pendulum.control) * dt );
+	 X4 = X1 + (a43 * V3 * dt);
+	 V4 = V1 + (a43 * pendulum_2_acceleration(x3,X3,v3,V3, pendulum.control) * dt ); 
+
+
+
 	 x2 = x1 + (a21 * v1 * dt);
-	console.log(x2);
-	 v2 = v1 + (a21 * pendulum_acceleration(x1, pendulum.control) * dt);
+//	console.log(x2);
+//	 v2 = v1 + (a21 * pendulum_acceleration(x1,X1, pendulum.control) * dt);
+//	 x3 = x1 + (a32 * v2 * dt);
+//	 v3 = v1 + (a32 * pendulum_acceleration(x2,X2, pendulum.control) * dt );
+//	 x4 = x1 + (a43 * v3 * dt);
+//	 v4 = v1 + (a43 * pendulum_acceleration(x3,X3, pendulum.control) * dt ); 
+
+	 v2 = v1 + (a21 * pendulum_acceleration(x1,X1,v1,V1, pendulum.control) * dt);
 	 x3 = x1 + (a32 * v2 * dt);
-	 v3 = v1 + (a32 * pendulum_acceleration(x2, pendulum.control) * dt );
+	 v3 = v1 + (a32 * pendulum_acceleration(x2,X2,v2,V2, pendulum.control) * dt );
 	 x4 = x1 + (a43 * v3 * dt);
-	 v4 = v1 + (a43 * pendulum_acceleration(x3, pendulum.control) * dt ); 
+	 v4 = v1 + (a43 * pendulum_acceleration(x3,X3,v3,V3, pendulum.control) * dt ); 
 
 
+	pendulum_2.angle = pendulum_2.angle + dt * (b1 * V1 + (b2 * V2) + (b3 * V3) + b4 * V4);
+ 
+//	pendulum_2.angle_dot = pendulum_2.angle_dot + dt * (b1 * pendulum_2_acceleration(X1,pendulum.control)
+// 				 + b2 * pendulum_2_acceleration(X2, pendulum.control)
+// 				 + b3 * pendulum_2_acceleration(X3, pendulum.control)
+//				 + b4 * pendulum_2_acceleration(X4, pendulum.control));
+	
+	pendulum_2.angle_dot = pendulum_2.angle_dot+ dt * (b1 * pendulum_2_acceleration(x1,X1,v1,V1,pendulum.control)
+ 				 + b2 * pendulum_2_acceleration(x2,X2,v2,V2, pendulum.control)
+ 				 + b3 * pendulum_2_acceleration(x3,X3,v3,V3, pendulum.control)
+				 + b4 * pendulum_2_acceleration(x4,X4,v4,V4, pendulum.control));
+	
 
 		
 
 	pendulum.angle = pendulum.angle + dt * (b1 * v1 + (b2 * v2) + (b3 * v3) + b4 * v4);
  
-	pendulum.angle_dot = pendulum.angle_dot + dt * (b1 * pendulum_acceleration(x1, pendulum.control)
- 				 + b2 * pendulum_acceleration(x2, pendulum.control)
- 				 + b3 * pendulum_acceleration(x3, pendulum.control)
-				 + b4 * pendulum_acceleration(x4, pendulum.control));
+//	pendulum.angle_dot = pendulum.angle_dot + dt * (b1 * pendulum_acceleration(x1,X1,pendulum.control)
+// 				 + b2 * pendulum_acceleration(x2,X2, pendulum.control)
+// 				 + b3 * pendulum_acceleration(x3,X3, pendulum.control)
+//				 + b4 * pendulum_acceleration(x4,X4, pendulum.control));
+	pendulum.angle_dot = pendulum.angle_dot + dt * (b1 * pendulum_acceleration(x1,X1,v1,V1,pendulum.control)
+ 				 + b2 * pendulum_acceleration(x2,X2,v2,V2, pendulum.control)
+ 				 + b3 * pendulum_acceleration(x3,X3,v3,V3, pendulum.control)
+				 + b4 * pendulum_acceleration(x4,X4,v4,V4, pendulum.control));
 /*
 	x1 = x2;
 	v1 = v2;	
@@ -265,11 +354,24 @@ function animate() {
         pendulum.angle = (pendulum.angle+Math.PI/180)%(2*Math.PI);
         pendulum.angle_dot = (pendulum.angle-pendulum.angle_previous)/dt;
         numerical_integrator = "none";
-    }
+      
+        pendulum_2.angle_previous = pendulum_2.angle;
+        pendulum_2.angle = (pendulum_2.angle+Math.PI/180)%(2*Math.PI);
+        pendulum_2.angle_dot = (pendulum_2.angle-pendulum_2.angle_previous)/dt;
+        numerical_integrator = "none";
+ 
+
+
+     }
 
     // set the angle of the pendulum
     pendulum.geom.rotation.y = pendulum.angle;  // threejs cylinders have their axes along the y-axis
 
+    pendulum_2.geom.rotation.y = pendulum_2.angle;
+
+    pendulum_2.geom.position = {x:pendulum.length*Math.cos(pendulum.angle-Math.PI/2), y:1.5+pendulum.length*Math.sin(pendulum.angle-Math.PI/2), z:0};
+
+  // console.log(pendulum_2.angle);
     // advance time
     t = t + dt;
 
@@ -317,10 +419,39 @@ function animate() {
 
 }
 
-function pendulum_acceleration(p,g) {
+//function pendulum_acceleration(p1,p2,u){
+
+function pendulum_acceleration(p1,p2,w1,w2,u) {
     // STENCIL: return acceleration(s) system equation(s) of motion 
-	var result = -gravity/pendulum.length*Math.sin(p) + g/(pendulum.mass*pendulum.length*pendulum.length);
+//	var result = -gravity/pendulum.length*Math.sin(p1) + g/(pendulum.mass*pendulum.length*pendulum.length);
+//	var result = -gravity/pendulum.length*Math.sin(p1) + pendulum_2.mass*gravity*Math.cos(p2)*Math.sin(p2-p1)/(pendulum.mass*pendulum.length)+u/(pendulum.mass*pendulum.length)*Math.sin(p2)*Math.sin(p2-p1);
+
+//different EOM
+	var result =(pendulum_2.mass*pendulum.length*Math.pow(w1,2)*Math.sin(p2-p1)*Math.cos(p2-p1) + 
+		pendulum_2.mass*gravity*Math.sin(p2)*Math.cos(p2-p1) + 
+		pendulum_2.mass*pendulum_2.length*Math.pow(w2,2)*Math.sin(p2-p1) - 
+		(pendulum.mass+pendulum_2.mass)*gravity*Math.sin(p1))/
+		((pendulum.mass+pendulum_2.mass)*pendulum.length - pendulum_2.mass*pendulum.length*Math.pow(Math.cos(p2-p1),2));
+
+
 	return result;
+
+}
+
+
+//function pendulum_acceleration(p2,u){
+function pendulum_2_acceleration(p1,p2,w1,w2,u) {
+
+//	var result2 = -gravity/pendulum_2.length*Math.sin(p2) + Math.cos(p2)/(pendulum_2.mass*pendulum_2.length)*u;
+	var result2 =(-pendulum_2.mass*pendulum_2.length*Math.pow(w2,2)*Math.sin(p2-p1)*Math.cos(p2-p1) +
+		( pendulum_2.mass+pendulum.mass)*(gravity*Math.sin(p1)*Math.cos(p2-p1)- 
+		pendulum.length*Math.pow(w1,2)*Math.sin(p2-p1) - 
+		gravity*Math.sin(p2)))/
+		((pendulum.mass+pendulum_2.mass)*pendulum_2.length - pendulum_2.mass*pendulum_2.length*Math.pow(Math.cos(p2-p1),2));
+
+
+	return result2;
+
 
 }
 
@@ -425,7 +556,7 @@ function createScene() {
 
     pendulum.geom = new THREE.Mesh(temp_geom, temp_material);
     pendulum.geom.rotateOnAxis(new THREE.Vector3(1,0,0),Math.PI/2);
-    //crossbar.add(pendulum.geom);
+   // crossbar.add(pendulum.geom);
     scene.add(pendulum.geom);
     pendulum.geom.position = {x:0,y:1.5,z:0};
 
@@ -439,6 +570,44 @@ function createScene() {
     pendulum_mass = new THREE.Mesh(temp_geom, temp_material);
     pendulum_mass.position = {x:0,y:-pendulum.length/2,z:0};
     pendulum_link.add(pendulum_mass);
+
+ //  add new geometry
+/*
+    temp_geom_2 = new THREE.CylinderGeometry(0.2, 0.2, 2.0, 20, 20, false);    crossbar_2 = new THREE.Mesh(temp_geom, temp_material);
+    crossbar_2.rotateOnAxis(new THREE.Vector3(1,0,0),Math.PI/2);
+    crossbar_2.position = {x:0,z:-3,y:0};
+    pendulum_link.add(crossbar_2);
+*/
+//
+ 
+
+    //console.log(pendulum.angle);
+
+    pendulum_2.geom = new THREE.Mesh(temp_geom, temp_material);
+    pendulum_2.geom.rotateOnAxis(new THREE.Vector3(1,0,0),Math.PI/2);
+   // crossbar.add(pendulum.geom);
+    scene.add(pendulum_2.geom);
+    pendulum_2.geom.position = {x:2*Math.cos(pendulum.angle),y:2*Math.cos(pendulum.angle),z:0};
+ //   pendulum_2.geom.position = pendulum_mass.position;
+    pendulum_link.add(pendulum_2);
+
+    temp_geom = new THREE.CylinderGeometry(0.2, 0.2, pendulum.length, 20, 20, false);
+    pendulum_link_2 = new THREE.Mesh(temp_geom, temp_material);
+    pendulum_link_2.rotateOnAxis(new THREE.Vector3(1,0,0),-Math.PI/2);
+    pendulum_link_2.position = {x:0,z:pendulum_2.length/2,y:0};
+    pendulum_2.geom.add(pendulum_link_2);
+
+    temp_geom = new THREE.SphereGeometry(Math.sqrt(pendulum.mass*0.1));
+    pendulum_mass = new THREE.Mesh(temp_geom, temp_material);
+    pendulum_mass.position = {x:0,y:-pendulum_2.length/2,z:0};
+    pendulum_link_2.add(pendulum_mass);
+
+
+
+
+
+
+
 }
 
 </script>
