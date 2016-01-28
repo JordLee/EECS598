@@ -167,13 +167,8 @@ function animate() {
 	pendulum.angle_previous = pendulum.angle;
 	pendulum.angle = pendulum.angle_previous + pendulum.angle_dot*dt
 
-
-//	pendulum.angle_init = (pendulum.angle+Math.PI/180)%(2*Math.PI);
-
-//	pendulum.angle_dot_init = (pendulum.angle_init-pendulum.angle_previous)/dt;
-	pendulum.angle_dot_dot = -gravity/pendulum.length*Math.sin(pendulum.angle_previous) + pendulum.control/(pendulum.mass*pendulum.length*pendulum.length);
+	pendulum.angle_dot_dot = pendulum_acceleration(pendulum.angle_previous,pendulum.control);
 	pendulum.angle_dot = pendulum.angle_dot + pendulum.angle_dot_dot*dt;
-//	pendulum.angle = pendulum.angle + pendulum.angle_dot*dt;
     }
     else if (numerical_integrator === "verlet") {
 
@@ -181,7 +176,7 @@ function animate() {
 	if (ver_state == true){
 	console.log("initializing");
 	pendulum.angle_previous = pendulum.angle;
-	pendulum.angle_dot_dot = -gravity/pendulum.length*Math.sin(pendulum.angle) + pendulum.control/(pendulum.mass*pendulum.length*pendulum.length);
+	pendulum.angle_dot_dot = pendulum_acceleration(pendulum.angle,pendulum.control)
 	pendulum.angle_init = pendulum.angle + pendulum.angle_dot*dt + 0.5*pendulum_acceleration(pendulum.angle,pendulum.control)*dt*dt;   
 	pendulum.angle_current = pendulum.angle_init;
 	pendulum.angle = 2*pendulum.angle_current - pendulum.angle_previous + pendulum.angle_dot_dot*dt*dt;
@@ -193,22 +188,17 @@ function animate() {
 
 	pendulum.angle_previous = pendulum.angle_current;
 	pendulum.angle_current = pendulum.angle;
-	//pendulum.angle_dot_dot = -gravity/pendulum.length*Math.sin(pendulum.angle) + pendulum.control/(pendulum.mass*pendulum.length*pendulum.length);
-	//pendulum.angle = pendulum.angle + pendulum.angle_dot*dt + 0.5*pendulum.angle_dot_dot*dt*dt;
 	
 	pendulum.angle = 2*pendulum.angle_current - pendulum.angle_previous + pendulum_acceleration(pendulum.angle,pendulum.control)*dt*dt;
 	pendulum.angle_dot = (pendulum.angle - pendulum.angle_previous)/(2*dt);
 	}
-	//console.log(ver_state);
     }
     else if (numerical_integrator === "velocity verlet") {
 
     // STENCIL: a correct velocity Verlet integrator is REQUIRED for assignment
 	pendulum.angle_previous = pendulum.angle;
-	pendulum.angle_dot_dot_previous = -gravity/pendulum.length*Math.sin(pendulum.angle_previous) + pendulum.control/(pendulum.mass*pendulum.length*pendulum.length);
-
+	pendulum.angle_dot_dot_previous = pendulum_acceleration(pendulum.angle_previous,pendulum.control);
 	pendulum.angle = pendulum.angle_previous + pendulum.angle_dot*dt + 0.5*pendulum.angle_dot_dot_previous*dt*dt;
-	//pendulum.angle_dot_dot = -gravity/pendulum.length*Math.sin(pendulum.angle) + pendulum.control/(pendulum.mass*pendulum.length*pendulum.length);
 
 	pendulum.angle_dot_dot = pendulum_acceleration(pendulum.angle,pendulum.control);
 	pendulum.angle_dot = pendulum.angle_dot + (pendulum.angle_dot_dot_previous + pendulum.angle_dot_dot)*0.5*dt;
@@ -222,7 +212,6 @@ function animate() {
 
 	pendulum.angle_previous = pendulum.angle;
 	
-//	var pendulum.angle_previous = pendulum.angle_dot;
 
 	 x1= pendulum.angle;
 	 v1 = pendulum.angle_dot; 
@@ -244,19 +233,6 @@ function animate() {
  				 + b2 * pendulum_acceleration(x2, pendulum.control)
  				 + b3 * pendulum_acceleration(x3, pendulum.control)
 				 + b4 * pendulum_acceleration(x4, pendulum.control));
-/*
-	x1 = x2;
-	v1 = v2;	
-	v2 = v3;
-	x2 = x3;
-	v3 = v4;
-	x3 = x4;
-	pendulum.angle = x4;
-	pendulum.angle_dot = v4;
-	
-	
-*/	
-
 
 
     } 
