@@ -172,6 +172,16 @@ function animate() {
 	pendulum_2.angle_previous = pendulum_2.angle;
 	pendulum_2.angle = pendulum_2.angle_previous + pendulum_2.angle_dot*dt
 
+/////////////////////////////// 
+///////  Note
+//////////////////////////////
+/**** Extended Single pendulm to double pendulm
+There is two kinds of Equation of Motion for double pendulm, w control input w/o control input, which in this case used second EOM w/o control input .
+For double pendulm, euler, verlet intergration blows up, but for verlet velocity and runge-cutta it works in reasonable manner
+****/
+
+
+
 //---------------- Equation Of Motion (EOM) 1
 
 /*
