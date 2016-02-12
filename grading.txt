@@ -1,9 +1,9 @@
 21: Lee,Jordan
 EECS 598-010 W16
 Assignment 1: CHECK
-comment: good work
+  comment: good work
 Assignment 2: CHECK
-comment: moderate servo performance; overreliance on I term
+  comment: moderate servo performance; overreliance on I term
 Assignment 3: PENDING
 Assignment 4: PENDING
 Assignment 5: PENDING
