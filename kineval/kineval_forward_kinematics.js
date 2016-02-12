@@ -65,7 +65,8 @@ var xyz = generate_translation_matrix(robot.joints[j].origin.xyz[0], robot.joint
 var roty = generate_rotation_matrix_Y(robot.joints[j].origin.rpy[0]);
 var rotx = generate_rotation_matrix_X(robot.joints[j].origin.rpy[2]);
 var rotz = generate_rotation_matrix_Z(robot.joints[j].origin.rpy[1]);
-var transform=matrix_multiply_3(xyz,rotx,roty,rotz);
+var rotxyz = matrix_multiply_3(rotx,roty,rotz);
+var transform=matrix_multiply(xyz,rotxyz);
 
 robot.joints[j].xform = matrix_multiply(mstack,transform);
 var mstack = robot.joints[j].xform;
@@ -106,7 +107,9 @@ var xyz = generate_translation_matrix(robot.joints[j].origin.xyz[0], robot.joint
 var rotz = generate_rotation_matrix_Z(robot.joints[j].origin.rpy[2]);
 var roty = generate_rotation_matrix_Y(robot.joints[j].origin.rpy[1]);
 var rotx = generate_rotation_matrix_X(robot.joints[j].origin.rpy[0]);
-var transform=matrix_multiply_3(xyz,rotx,roty,rotz);
+var rotxyz = matrix_multiply_3(rotx,roty,rotz);
+var transform=matrix_multiply(xyz,rotxyz);
+
 robot.joints[j].xform = matrix_multiply(mstack,transform);
 var mstack = robot.joints[j].xform;
 l = robot.joints[j].child;
