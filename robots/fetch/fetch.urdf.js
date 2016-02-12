@@ -11,6 +11,7 @@
 */
 
 
+
 robot = {
     name:"fetch", 
     base:"base_link", 
@@ -265,6 +266,7 @@ function assignFetchModel(filename,index) {
             console.log(filename+" - "+index+": "+(xhr.loaded / xhr.total * 100) + '% loaded' );
         }
     );
+//links_geom["base_link"].applyMatrix( new THREE.Matrix4().makeTranslation(0,0.2,0));
 }
 
 
