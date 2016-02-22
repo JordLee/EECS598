@@ -4,7 +4,8 @@ Assignment 1: CHECK
   comment: good work
 Assignment 2: CHECK
   comment: moderate servo performance; overreliance on I term
-Assignment 3: PENDING
+Assignment 3: CHECK
+  comment: good work
 Assignment 4: PENDING
 Assignment 5: PENDING
 Assignment 6: PENDING
