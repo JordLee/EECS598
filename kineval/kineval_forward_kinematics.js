@@ -33,19 +33,34 @@ kineval.robotForwardKinematics = function robotForwardKinematics () {
 }
 kineval.buildFKTransformsFetch = function traverseFKBaseFetch () {
 
+
 var xyz = generate_translation_matrix(robot.origin.xyz[0], robot.origin.xyz[1], robot.origin.xyz[2]);
 var roty = generate_rotation_matrix_Y(robot.origin.rpy[2]);
 var rotx = generate_rotation_matrix_X(robot.origin.rpy[0]-Math.PI/2);
-var rotz = generate_rotation_matrix_Z(robot.origin.rpy[1]);
+var rotz = generate_rotation_matrix_Z(robot.origin.rpy[1]-Math.PI/2);
 var rotxyz = matrix_multiply_3(rotx,roty,rotz);
 var mstack = matrix_multiply(xyz,rotxyz);
 
- robot.origin.xform = mstack;
+ //robot.origin.xform = mstack;
  traverseFKLinkFetch(mstack,robot.base);
  }
 
 
 function traverseFKLinkFetch (mstack,l){
+
+robot_heading = [ [0],[0],[1],[0] ];
+
+robot_heading[0][0] = robot.origin.xyz[0];
+robot_heading[1][0] = robot.origin.xyz[1];
+robot_heading[2][0] += robot.origin.xyz[2];
+
+
+
+robot_lateral = [ [1],[0],[0],[0] ];
+robot_lateral[0][0] += robot.origin.xyz[0];
+robot_lateral[1][0] = robot.origin.xyz[1];
+robot_lateral[2][0] = robot.origin.xyz[2];
+
 
 robot.links[l].xform = mstack;
 var i ;
@@ -68,7 +83,24 @@ var rotz = generate_rotation_matrix_Z(robot.joints[j].origin.rpy[1]);
 var rotxyz = matrix_multiply_3(rotx,roty,rotz);
 var transform=matrix_multiply(xyz,rotxyz);
 
-robot.joints[j].xform = matrix_multiply(mstack,transform);
+
+var quaternionRot = quaternion_to_rotation_matrix(quaternion_normalize(quaternion_from_axisangle(j)));
+
+	if ( robot.joints[j].type == 'prismatic'){
+	var transPrism = generate_translation_matrix(robot.joints[j].axis[0]*robot.joints[j].angle, robot.joints[j].axis[1]*robot.joints[j].angle,robot.joints[j].axis[2]* robot.joints[j].angle);
+	robot.joints[j].xform = matrix_multiply_3(mstack,transform,transPrism);
+
+	}
+	else if (robot.joints[j].type == 'revolute') {
+
+	robot.joints[j].xform = matrix_multiply_3(mstack,transform,quaternionRot);
+	}
+
+	else {
+	robot.joints[j].xform = matrix_multiply(mstack,transform);
+	}
+
+
 var mstack = robot.joints[j].xform;
 l = robot.joints[j].child;
 traverseFKLinkFetch(mstack,l);
@@ -90,6 +122,24 @@ traverseFKLink(mstack,robot.base);
 
 
 function traverseFKLink (mstack,l){
+
+robot_heading = [ [0],[0],[1],[0] ];
+
+robot_heading[0][0] = robot.origin.xyz[0];
+robot_heading[1][0] = robot.origin.xyz[1];
+robot_heading[2][0] += robot.origin.xyz[2];
+
+
+
+robot_lateral = [ [1],[0],[0],[0] ];
+robot_lateral[0][0] += robot.origin.xyz[0];
+robot_lateral[1][0] = robot.origin.xyz[1];
+robot_lateral[2][0] = robot.origin.xyz[2];
+
+
+
+
+
 robot.links[l].xform = mstack;
 var i ;
 if (typeof robot.links[l].children === 'undefined')
@@ -110,7 +160,12 @@ var rotx = generate_rotation_matrix_X(robot.joints[j].origin.rpy[0]);
 var rotxyz = matrix_multiply_3(rotx,roty,rotz);
 var transform=matrix_multiply(xyz,rotxyz);
 
-robot.joints[j].xform = matrix_multiply(mstack,transform);
+
+//quaterniontest = quaternion_to_rotation_matrix(quaternion_normalize(quaternion_from_axisangle(j)));
+
+var quaternionRot = quaternion_to_rotation_matrix(quaternion_normalize(quaternion_from_axisangle(j)));
+
+robot.joints[j].xform = matrix_multiply_3(mstack,transform,quaternionRot);
 var mstack = robot.joints[j].xform;
 l = robot.joints[j].child;
 

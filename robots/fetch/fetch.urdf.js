@@ -190,6 +190,8 @@ robot.joints.torso_fixed_joint = {parent:"base_link", child:"torso_fixed_link"};
 robot.joints.torso_fixed_joint.axis = [0,1,0];
 robot.joints.torso_fixed_joint.type = "fixed";
 robot.joints.torso_fixed_joint.origin = {xyz: [-0.086875,0,0.377425], rpy:[-6.12303176911189E-17,0,0]};
+robot.joints.torso_fixed_joint.limit = {lower:0, upper:0};
+
 
 /*
 robot.joints.head_camera_joint = {parent:"head_tilt_link", child:"head_camera_link"};
