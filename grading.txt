@@ -6,7 +6,10 @@ Assignment 2: CHECK
   comment: moderate servo performance; overreliance on I term
 Assignment 3: CHECK
   comment: good work
-Assignment 4: PENDING
+Assignment 4: DUE
+  error: base control does not properly respond to user input
+  comment: robot does not follow heading and lateral directions
+  error: joint rotation does not properly respond to user events
 Assignment 5: PENDING
 Assignment 6: PENDING
 Assignment 7: PENDING
