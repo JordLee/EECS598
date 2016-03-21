@@ -135,28 +135,58 @@ kineval.handleUserInput = function user_input() {
     if ( keyboard.pressed("w") ) {  // forward
         textbar.innerHTML = "moving base forward";
         //robot.origin.xyz[2] += 0.1;  // simple but ineffective: not aligned with robot
-        robot.control.xyz[2] += 0.1 * (robot_heading[2][0]-robot.origin.xyz[2]);
-        robot.control.xyz[0] += 0.1 * (robot_heading[0][0]-robot.origin.xyz[0]);
-    }
+  //      robot.control.xyz[2] += 0.1 * (robot_heading[2][0]-robot.origin.xyz[2]);
+  //      robot.control.xyz[0] += 0.1 * (robot_heading[0][0]-robot.origin.xyz[0]);
+ 	robot.control.xyz[0] +=0.1* robot_heading[0][0];
+ 	robot.control.xyz[1] +=0.1* robot_heading[1][0];
+ 	robot.control.xyz[2] +=0.1* robot_heading[2][0];
+
+   }
     if ( keyboard.pressed("s") ) {  // backward
         textbar.innerHTML = "moving base backward";
         //robot.origin.xyz[2] -= 0.1; // simple but ineffective: not aligned with robot
-        robot.control.xyz[2] += -0.1 * (robot_heading[2][0]-robot.origin.xyz[2]);
-        robot.control.xyz[0] += -0.1 * (robot_heading[0][0]-robot.origin.xyz[0]);
+//        robot.control.xyz[2] += -0.1 * (robot_heading[2][0]-robot.origin.xyz[2]);
+//        robot.control.xyz[0] += -0.1 * (robot_heading[0][0]-robot.origin.xyz[0]);
+
+ 	robot.control.xyz[0] -= 0.1* robot_heading[0][0];
+ 	robot.control.xyz[1] -= 0.1* robot_heading[1][0];
+ 	robot.control.xyz[2] -= 0.1* robot_heading[2][0];
+
+
+
+
     }
     if ( keyboard.pressed("q") ) {  // strafe
         textbar.innerHTML = "moving base left";
         //robot.origin.xyz[0] += 0.1; // simple but ineffective: not aligned with robot
 
-        robot.control.xyz[2] += 0.1 * (robot_lateral[2][0]-robot.origin.xyz[2]);
-        robot.control.xyz[0] += 0.1 * (robot_lateral[0][0]-robot.origin.xyz[0]);
+//        robot.control.xyz[2] += 0.1 * (robot_lateral[2][0]-robot.origin.xyz[2]);
+//        robot.control.xyz[0] += 0.1 * (robot_lateral[0][0]-robot.origin.xyz[0]);
+
+ 	robot.control.xyz[0] +=0.1* robot_lateral[0][0];
+ 	robot.control.xyz[1] +=0.1* robot_lateral[1][0];
+ 	robot.control.xyz[2] +=0.1* robot_lateral[2][0];
+
+
+
     }
     if ( keyboard.pressed("e") ) {  // strafe
         textbar.innerHTML = "moving base right";
         // robot.origin.xyz[0] -= 0.1; // simple but ineffective: not aligned with robot
 
-        robot.control.xyz[2] += -0.1 * (robot_lateral[2][0]-robot.origin.xyz[2]);
-        robot.control.xyz[0] += -0.1 * (robot_lateral[0][0]-robot.origin.xyz[0]);
+//        robot.control.xyz[2] += -0.1 * (robot_lateral[2][0]-robot.origin.xyz[2]);
+//        robot.control.xyz[0] += -0.1 * (robot_lateral[0][0]-robot.origin.xyz[0]);
+
+
+
+ 	robot.control.xyz[0] -=0.1* robot_lateral[0][0];
+ 	robot.control.xyz[1] -=0.1* robot_lateral[1][0];
+ 	robot.control.xyz[2] -=0.1* robot_lateral[2][0];
+
+
+
+
+
     }
 
 

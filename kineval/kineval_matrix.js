@@ -160,6 +160,42 @@ var rot_z = [
 return rot_z;
 }
 
+function vector_cross_f(x,y){
+
+result=[];
+for (var i=0;i<x.length;i++){
+result[i]=[];
+}
+result[0][0]=x[1][0]*y[2][0]-x[2][0]*y[1][0];
+result[1][0]=x[2][0]*y[0][0]-x[0][0]*y[2][0];
+result[2][0]=x[0][0]*y[1][0]-x[1][0]*y[0][0];
+result[3][0]=1;
+return result;
+}
+function vector_minus(x,y){
+var result=[];
+
+for (var i=0;i<x.length;i++){
+result[i]=[];
+result[i][0]=x[i][0]-y[i][0];
+}
+return result;
+
+}
+
+
+function vector_minus_2(x,y){
+var result=[];
+
+for (var i=0;i<x.length;i++){
+result[i]=x[i]-y[i];
+}
+return result;
+
+}
+
+
+
 
     // STENCIL: reference matrix code has the following functions:
     //   matrix_multiply

@@ -48,18 +48,27 @@ var mstack = matrix_multiply(xyz,rotxyz);
 
 function traverseFKLinkFetch (mstack,l){
 
-robot_heading = [ [0],[0],[1],[0] ];
+robot_heading = [ [0],[0],[0],[0] ];
 
-robot_heading[0][0] = robot.origin.xyz[0];
-robot_heading[1][0] = robot.origin.xyz[1];
-robot_heading[2][0] += robot.origin.xyz[2];
+//robot_heading[0][0] = robot.origin.xyz[0];
+//robot_heading[1][0] = robot.origin.xyz[1];
+//robot_heading[2][0] += robot.origin.xyz[2];
+
+robot_heading[0][0] = mstack[0][0];
+robot_heading[1][0] = mstack[1][0];
+robot_heading[2][0] = mstack[2][0];
 
 
 
 robot_lateral = [ [1],[0],[0],[0] ];
-robot_lateral[0][0] += robot.origin.xyz[0];
-robot_lateral[1][0] = robot.origin.xyz[1];
-robot_lateral[2][0] = robot.origin.xyz[2];
+
+//robot_lateral[0][0] += robot.origin.xyz[0];
+//robot_lateral[1][0] = robot.origin.xyz[1];
+//robot_lateral[2][0] = robot.origin.xyz[2];
+robot_lateral[0][0] = mstack[0][1];
+robot_lateral[1][0] = mstack[1][1];
+robot_lateral[2][0] = mstack[2][1];
+
 
 
 robot.links[l].xform = mstack;
@@ -96,8 +105,14 @@ var quaternionRot = quaternion_to_rotation_matrix(quaternion_normalize(quaternio
 	robot.joints[j].xform = matrix_multiply_3(mstack,transform,quaternionRot);
 	}
 
-	else {
+	else if (robot.joints[j].type == 'fixed'){
+
 	robot.joints[j].xform = matrix_multiply(mstack,transform);
+
+	}
+
+	else {
+	robot.joints[j].xform = matrix_multiply_3(mstack,transform,quaternionRot);
 	}
 
 
@@ -110,9 +125,9 @@ traverseFKLinkFetch(mstack,l);
 kineval.buildFKTransforms = function traverseFKBase () {
 
 var xyz = generate_translation_matrix(robot.origin.xyz[0], robot.origin.xyz[1], robot.origin.xyz[2]);
-var rotz = generate_rotation_matrix_Z(robot.origin.rpy[0]);
+var rotz = generate_rotation_matrix_Z(robot.origin.rpy[2]);
 var roty = generate_rotation_matrix_Y(robot.origin.rpy[1]);
-var rotx = generate_rotation_matrix_X(robot.origin.rpy[2]);
+var rotx = generate_rotation_matrix_X(robot.origin.rpy[0]);
 var rotxyz = matrix_multiply_3(rotx,roty,rotz);
 var mstack = matrix_multiply(xyz,rotxyz);
 
@@ -123,18 +138,24 @@ traverseFKLink(mstack,robot.base);
 
 function traverseFKLink (mstack,l){
 
-robot_heading = [ [0],[0],[1],[0] ];
+robot_heading = [ [0],[0],[0],[0] ];
 
-robot_heading[0][0] = robot.origin.xyz[0];
-robot_heading[1][0] = robot.origin.xyz[1];
-robot_heading[2][0] += robot.origin.xyz[2];
-
+//robot_heading[0][0] = robot.origin.xyz[0];
+//robot_heading[1][0] = robot.origin.xyz[1];
+//robot_heading[2][0] += robot.origin.xyz[2];
+robot_heading[0][0] = -mstack[0][1];
+robot_heading[1][0] = -mstack[1][1];
+robot_heading[2][0] = -mstack[2][1];
 
 
 robot_lateral = [ [1],[0],[0],[0] ];
-robot_lateral[0][0] += robot.origin.xyz[0];
-robot_lateral[1][0] = robot.origin.xyz[1];
-robot_lateral[2][0] = robot.origin.xyz[2];
+//robot_lateral[0][0] += robot.origin.xyz[0];
+//robot_lateral[1][0] = robot.origin.xyz[1];
+//robot_lateral[2][0] = robot.origin.xyz[2];
+robot_lateral[0][0] = mstack[0][0];
+robot_lateral[1][0] = mstack[1][0];
+robot_lateral[2][0] = mstack[2][0];
+
 
 
 
