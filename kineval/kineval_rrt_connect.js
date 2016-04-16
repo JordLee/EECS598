@@ -60,7 +60,25 @@ kineval.planMotionRRTConnect = function motionPlanningRRTConnect() {
 
 
 	var motion_plan_a = [];
-	motion_plan_A = find_path(T_a.vertices[0],T_a,motion_plan_a);
+	var motion_plan_b = [];
+//	motion_plan_A = find_path(T_a.vertices[0],T_a,motion_plan_a);
+
+
+	find_path_2(T_a.vertices[0],T_a.vertices[T_a.newest],motion_plan_a);
+	find_path_2_B(T_b.vertices[0],T_b.vertices[T_b.newest],motion_plan_b);
+
+	var C =A.concat(B);
+	for (i=0;i<C.length;i++){
+
+	C[i].geom.material.color = { r:1,g:0,b:0 };
+	}
+	kineval.motion_plan = C;
+
+//	for (i=0;i<B.length;i++){
+//
+//	B[i].geom.material.color = { r:1,g:0,b:0 };
+//	}
+
 
 	//console.log(motion_plan_a);
 //	var motion_plan_b = [];	
@@ -390,47 +408,50 @@ function rrt_connect(tree,q) {
 	return s
 }
 
-function find_path(TV,tree,motion_plan) {
+
+
+function find_path_2(TV,tree,motion_plan){
 
 var k = motion_plan.length;
-console.log(TV.vertex[0],TV.vertex[2]);	
 
-	if (Math.abs(Math.pow(TV.vertex[0]-tree.vertices[0].vertex[0],2) + Math.pow(TV.vertex[2]-tree.vertices[0].vertex[2],2))<0.0001 ){
-	console.log("going once");
-	find_path(TV.edges[0],tree,motion_plan);
-	}
-	
-	else if ((typeof TV.edges[1] === "undefined") && Math.abs((Math.pow(TV.vertex[0]-tree.vertices[tree.newest].vertex[0],2) + Math.pow(TV.vertex[2]-tree.vertices[tree.newest].vertex[2],2)))>stepsize){
-	console.log("terminated");
-	
-	return;
-	}
-	else if ( (Math.pow(TV.vertex[0]-tree.vertices[tree.newest].vertex[0],2) + Math.pow(TV.vertex[2]-tree.vertices[tree.newest].vertex[2],2))<0.0001){
-	console.log("final output");
-	A = motion_plan; 	
-		for (i=0;i<A.length;i++){
-			for (j=0;j<A[i].vertex;j++){
-    			A[i].vertex[j].geom.material.color = { r:1,g:0,b:0};
-			}
-		}
-	
+console.log(k);
+if (Math.pow(TV.vertex[0]-tree.vertex[0],2) + Math.pow(TV.vertex[2]-tree.vertex[2],2)>0.01){
+motion_plan.push(tree);
+console.log(motion_plan);
+}
+else if(Math.pow(TV.vertex[0]-tree.vertex[0],2) + Math.pow(TV.vertex[2]-tree.vertex[2],2)<0.001){
+A = motion_plan;
+//console.log(A);
 
-	return motion_plan
-	}
-	else{
-	console.log("else");	
-		for (j=1;j<TV.edges.length;j++){
-		console.log("forloop")
-		console.log(j);
-		var T= TV.edges[j];
-		motion_plan[k] = T; 
-		motion_plan.push(T)
-		find_path(T,tree,motion_plan);
-		}
+return A;
 
-	}
+}
+find_path_2(TV,tree.edges[0],motion_plan);
 }
 
+
+function find_path_2_B(TVB,treeB,motion_planB){
+
+var k = motion_planB.length;
+
+console.log(k);
+if (Math.pow(TVB.vertex[0]-treeB.vertex[0],2) + Math.pow(TVB.vertex[2]-treeB.vertex[2],2)>0.01){
+motion_planB.push(treeB);
+//console.log(motion_plan);
+}
+else if(Math.pow(TVB.vertex[0]-treeB.vertex[0],2) + Math.pow(TVB.vertex[2]-treeB.vertex[2],2)<0.001){
+B = motion_planB;
+//console.log(A);
+
+return B;
+
+}
+
+
+
+find_path_2_B(TVB,treeB.edges[0],motion_planB);
+
+}
 
 
     // STENCIL: implement RRT-Connect functions here, such as:
