@@ -120,7 +120,7 @@ function startingPlaceholderAnimate() {
 
     }
 
-	console.log(jitter_radius);
+//	console.log(jitter_radius);
 
 
     // CREATE TRANSFORMATION MATRIX
@@ -168,7 +168,7 @@ function startingPlaceholderAnimate() {
         robot.links[x].xform = matrix_copy(jsmat);
     } 
 
-	console.log(jitter_radius);
+//	console.log(jitter_radius);
 
 } 
 

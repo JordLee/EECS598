@@ -55,9 +55,43 @@ kineval.planMotionRRTConnect = function motionPlanningRRTConnect() {
             kineval.params.generating_motion_plan = false;
             textbar.innerHTML = "planner execution complete";
             kineval.params.planner_state = "complete";
-        }
+        
+	console.log(T_a.vertices.length);
+
+
+	var motion_plan_a = [];
+	var motion_plan_b = [];
+//	motion_plan_A = find_path(T_a.vertices[0],T_a,motion_plan_a);
+
+
+	find_path_2(T_a.vertices[0],T_a.vertices[T_a.newest],motion_plan_a);
+	find_path_2_B(T_b.vertices[0],T_b.vertices[T_b.newest],motion_plan_b);
+
+	var C =A.concat(B);
+	for (i=0;i<C.length;i++){
+
+	C[i].geom.material.color = { r:1,g:0,b:0 };
+	}
+	kineval.motion_plan = C;
+
+//	for (i=0;i<B.length;i++){
+//
+//	B[i].geom.material.color = { r:1,g:0,b:0 };
+//	}
+
+
+	//console.log(motion_plan_a);
+//	var motion_plan_b = [];	
+//	motion_plan_b = find_path(T_b.vertices[0],T_b,motion_plan_b);
+
+//	kineval.motion_plan = motion_plan_a.push(motion_plan_b);
+
+
+
+
+	}
         else kineval.params.planner_state = "searching";
-    }
+   	}
     else if (kineval.params.update_motion_plan_traversal||kineval.params.persist_motion_plan_traversal) {
 
         if (kineval.params.persist_motion_plan_traversal) {
@@ -113,7 +147,17 @@ kineval.robotRRTPlannerInit = function robot_rrt_planner_init() {
     // set goal configuration as the zero configuration
     var i; 
     q_goal_config = new Array(q_start_config.length);
-    for (i=0;i<q_goal_config.length;i++) q_goal_config[i] = 0;
+    for (i=0;i<q_goal_config.length;i++) q_goal_config[i] = 0.001;
+
+
+	q_init = q_start_config;
+	q_goal = q_goal_config;
+
+	T_a = tree_init(q_init);
+	T_b = tree_init(q_goal);
+
+
+
 
     // flag to continue rrt iterations
     rrt_iterate = true;
@@ -146,7 +190,30 @@ function robot_rrt_planner_iterate() {
     //   tree_init - creates a tree of configurations
     //   tree_add_vertex - adds and displays new configuration vertex for a tree
     //   tree_add_edge - adds and displays new tree edge between configurations
+
+	var q_rand = random_config();
+
+//console.log(rrt_extend(T_a,q_rand));
+		if (rrt_extend(T_a,q_rand) !== "trapped"){	
+	
+
+//		console.log(q_new);
+			if (rrt_connect(T_b,T_a.vertices[T_a.newest].vertex) == "reached"){
+			console.log("terminate")
+			return "reached";
+			}			
+		T_c = T_a;
+		T_a = T_b;		 
+		T_b = T_c;
+
+		}	
+
+
+//	rrt_extend(T_a,q_rand);
     }
+//	 tree = tree_init(q);
+ //      	console.log(tree_add_vertex(tree,q));
+
 
 }
 
@@ -216,11 +283,175 @@ function tree_add_edge(tree,q1_idx,q2_idx) {
     tree.vertices[q2_idx].edges.push(tree.vertices[q1_idx]);
 
     // can draw edge here, but not doing so to save rendering computation
+  //  tree.vertices[q1_idx].child.push(tree.vertices[q2_idx]);
+
+  //   tree.vertices[q2_idx].parent.push(tree.vertices[q1_idx]);
+
+
 }
 
 //////////////////////////////////////////////////
 /////     RRT IMPLEMENTATION FUNCTIONS
 //////////////////////////////////////////////////
+
+function rrt_extend(tree,q) {
+
+qnear = nearest_neighbor(q,tree);
+
+q_near= qnear[1];
+q_near_index = qnear[0];
+
+//if ((new_config(q,q_near) && robot_collision_forward_kinematics(q_near))==false) {
+
+
+//console.log(robot_collision_forward_kinematics(q_near));
+if (new_config(tree,q,q_near)) {
+
+	var q_new=new_config(tree,q,q_near);
+	tree_add_vertex(tree,q_new);	
+	tree_add_edge(tree,q_near_index,tree.newest);
+
+//	console.log(q_new[0]-q[0]);
+
+
+	if(Math.abs(Math.pow(q_new[0]-q[0],2)+Math.pow(q_new[2]-q[2],2))<0.01){
+	return "reached"
+	} else{
+
+//	console.log("working/?");
+	return "advanced"
+	}
+	
+	
+	}
+return "trapped"
+
+
+
+}
+
+
+
+function new_config(tree,q,q_near) {
+
+stepsize =0.1;
+var q_new = [];
+
+//console.log(q_near);
+//console.log(q);
+q_new[0]=stepsize*(q[0]-q_near[0])/Math.abs(q[0]-q_near[0])+q_near[0];
+q_new[1]=0;
+q_new[2]=stepsize*(q[2]-q_near[2])/Math.abs(q[2]-q_near[2])+q_near[2];
+
+//q_new[0] = q[0];
+//q_new[2] = q[2];
+
+
+q_new[3] = q[3];
+q_new[4] = q[4];
+q_new[5] = q[5];
+
+//console.log(q_new);
+//console.log(tree.newest);
+
+	if (tree.newest == 0){
+	return q_new
+	}
+
+
+	else if(tree.newest !==0 &&robot_collision_forward_kinematics(q_new)==false){
+	return q_new
+	}
+}
+
+
+function nearest_neighbor(q,tree) {
+
+	 distance = [];
+
+	for (i=0;i<tree.vertices.length;i++) {
+	
+	 distance[i] = Math.pow(q[0]-tree.vertices[i].vertex[0],2) + Math.pow(q[2]-tree.vertices[i].vertex[2],2); 
+	}
+
+	 nearest_index = distance.indexOf(Math.min(...distance));
+
+	return [nearest_index,tree.vertices[nearest_index].vertex]
+
+}
+
+
+function random_config() {
+
+
+//	if (robot_collision_forward_kinematics(q)){
+	var q_rand = [  [2*(Math.random()-0.5)*robot_boundary[0][0]],
+                [0],
+              [2*(Math.random()-0.5)*robot_boundary[0][2]],[0],[Math.random()*2*Math.PI],[0] ];
+
+	return q_rand
+
+//	}
+
+}
+
+function rrt_connect(tree,q) {
+//console.log("getting in");
+	var s = "trapped";
+	var s;	
+//	while ( s !== "advanced") {
+
+//	console.log("while?");
+	s = rrt_extend(tree,q);
+	console.log(s);	
+//	}
+	return s
+}
+
+
+
+function find_path_2(TV,tree,motion_plan){
+
+var k = motion_plan.length;
+
+console.log(k);
+if (Math.pow(TV.vertex[0]-tree.vertex[0],2) + Math.pow(TV.vertex[2]-tree.vertex[2],2)>0.01){
+motion_plan.push(tree);
+console.log(motion_plan);
+}
+else if(Math.pow(TV.vertex[0]-tree.vertex[0],2) + Math.pow(TV.vertex[2]-tree.vertex[2],2)<0.001){
+A = motion_plan;
+//console.log(A);
+
+return A;
+
+}
+find_path_2(TV,tree.edges[0],motion_plan);
+}
+
+
+function find_path_2_B(TVB,treeB,motion_planB){
+
+var k = motion_planB.length;
+
+console.log(k);
+if (Math.pow(TVB.vertex[0]-treeB.vertex[0],2) + Math.pow(TVB.vertex[2]-treeB.vertex[2],2)>0.01){
+motion_planB.push(treeB);
+//console.log(motion_plan);
+}
+else if(Math.pow(TVB.vertex[0]-treeB.vertex[0],2) + Math.pow(TVB.vertex[2]-treeB.vertex[2],2)<0.001){
+B = motion_planB;
+//console.log(A);
+
+return B;
+
+}
+
+
+
+find_path_2_B(TVB,treeB.edges[0],motion_planB);
+
+}
 
 
     // STENCIL: implement RRT-Connect functions here, such as:
@@ -231,6 +462,7 @@ function tree_add_edge(tree,q1_idx,q2_idx) {
     //   nearest_neighbor
     //   normalize_joint_state
     //   find_path
+
     //   path_dfs
 
 
