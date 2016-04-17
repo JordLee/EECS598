@@ -15,4 +15,5 @@ Assignment 5: DUE
   error: endeffector does not converge to target for all tests
   warning: endeffector oscillates and overshoots producing jerky (3rd derivative) motion
 Assignment 6: PENDING
-Assignment 7: PENDING
+Assignment 7: CHECK
+
