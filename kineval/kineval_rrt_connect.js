@@ -56,7 +56,7 @@ kineval.planMotionRRTConnect = function motionPlanningRRTConnect() {
             textbar.innerHTML = "planner execution complete";
             kineval.params.planner_state = "complete";
         
-	console.log(T_a.vertices.length);
+	//console.log(T_a.vertices.length);
 
 
 	var motion_plan_a = [];
@@ -66,6 +66,8 @@ kineval.planMotionRRTConnect = function motionPlanningRRTConnect() {
 
 	find_path_2(T_a.vertices[0],T_a.vertices[T_a.newest],motion_plan_a);
 	find_path_2_B(T_b.vertices[0],T_b.vertices[T_b.newest],motion_plan_b);
+	A= A.reverse();
+//	B= B.reverse();
 
 	var C =A.concat(B);
 	for (i=0;i<C.length;i++){
@@ -114,12 +116,20 @@ kineval.planMotionRRTConnect = function motionPlanningRRTConnect() {
             kineval.motion_plan[kineval.motion_plan_traversal_index].vertex[5]
         ];
 
+//	if (( keyboard.pressed("n"))
+// 	if ((keyboard.pressed("n"))&&(kineval.motion_plan_traversal_index<kineval.motion_plan.length-1)) {
+//                kineval.motion_plan_traversal_index++; 
+//	}
+	
+
         // KE 2 : need to move q_names into a global parameter
         for (x in robot.joints) {
+      		
+            //console.log(kineval.motion_plan[kineval.motion_plan_traversal_index].vertex[q_names[x]]);
             robot.joints[x].angle = kineval.motion_plan[kineval.motion_plan_traversal_index].vertex[q_names[x]];
         }
 
-    }
+   }
 }
 
 
@@ -141,8 +151,11 @@ kineval.robotRRTPlannerInit = function robot_rrt_planner_init() {
 
     for (x in robot.joints) {
         q_names[x] = q_start_config.length;
-        q_index[q_start_config.length] = x;
+	q_index[q_start_config.length] = x;
     }
+
+	
+    //console.log(q_names);
 
     // set goal configuration as the zero configuration
     var i; 
@@ -337,31 +350,40 @@ function new_config(tree,q,q_near) {
 stepsize =0.1;
 var q_new = [];
 
-//console.log(q_near);
-//console.log(q);
 q_new[0]=stepsize*(q[0]-q_near[0])/Math.abs(q[0]-q_near[0])+q_near[0];
 q_new[1]=0;
 q_new[2]=stepsize*(q[2]-q_near[2])/Math.abs(q[2]-q_near[2])+q_near[2];
 
-//q_new[0] = q[0];
-//q_new[2] = q[2];
-
+//console.log(q_names);
+//for (i=0;i< robot.joints.length;i++) {
+//q_new[3+i*3] = q[3];
+//q_new[4+i*3] = 0;
+//q_new[5+i*3] = q[5];
+//}
 
 q_new[3] = q[3];
 q_new[4] = q[4];
 q_new[5] = q[5];
 
-//console.log(q_new);
-//console.log(tree.newest);
+	for (x in robot.joints) {
+	q_new[q_names[x]]=2*(Math.random()-0.5)*(Math.PI); 
+	}
 
 	if (tree.newest == 0){
+	
 	return q_new
 	}
 
 
 	else if(tree.newest !==0 &&robot_collision_forward_kinematics(q_new)==false){
+//	console.log(robot_collision_forward_kinematics(q_new));
 	return q_new
 	}
+//	else if(tree.newest !==0 &&robot_collision_forward_kinematics(q_new)!==false){
+//	new_config(tree,q,q_near);
+//	}
+	
+
 }
 
 
@@ -387,7 +409,7 @@ function random_config() {
 //	if (robot_collision_forward_kinematics(q)){
 	var q_rand = [  [2*(Math.random()-0.5)*robot_boundary[0][0]],
                 [0],
-              [2*(Math.random()-0.5)*robot_boundary[0][2]],[0],[Math.random()*2*Math.PI],[0] ];
+              [2*(Math.random()-0.5)*robot_boundary[0][2]],[0],[2*(Math.random()-0.5)*(Math.PI)],[0] ];
 
 	return q_rand
 
@@ -403,7 +425,7 @@ function rrt_connect(tree,q) {
 
 //	console.log("while?");
 	s = rrt_extend(tree,q);
-	console.log(s);	
+//	console.log(s);	
 //	}
 	return s
 }
@@ -414,10 +436,10 @@ function find_path_2(TV,tree,motion_plan){
 
 var k = motion_plan.length;
 
-console.log(k);
+//console.log(k);
 if (Math.pow(TV.vertex[0]-tree.vertex[0],2) + Math.pow(TV.vertex[2]-tree.vertex[2],2)>0.01){
 motion_plan.push(tree);
-console.log(motion_plan);
+//console.log(motion_plan);
 }
 else if(Math.pow(TV.vertex[0]-tree.vertex[0],2) + Math.pow(TV.vertex[2]-tree.vertex[2],2)<0.001){
 A = motion_plan;
@@ -434,7 +456,7 @@ function find_path_2_B(TVB,treeB,motion_planB){
 
 var k = motion_planB.length;
 
-console.log(k);
+//console.log(k);
 if (Math.pow(TVB.vertex[0]-treeB.vertex[0],2) + Math.pow(TVB.vertex[2]-treeB.vertex[2],2)>0.01){
 motion_planB.push(treeB);
 //console.log(motion_plan);

@@ -29,7 +29,7 @@ kineval.robotIsCollision = function robot_iscollision() {
         robot.origin.rpy[2]
     ];
 
-    q_names = {};  // store mapping between joint names and q DOFs
+     q_names = {};  // store mapping between joint names and q DOFs
 
     for (x in robot.joints) {
         q_names[x] = q_robot_config.length;
@@ -181,17 +181,35 @@ function collision_FK_joint(j,mstack,q){
 
 //console.log(j);
 var xyz = generate_translation_matrix(j.origin.xyz[0], j.origin.xyz[1], j.origin.xyz[2]);
-var roty = generate_rotation_matrix_Y(j.origin.rpy[0]);
+var roty = generate_rotation_matrix_Y(q[q_names[j.name]]);
 var rotx = generate_rotation_matrix_X(j.origin.rpy[2]);
 var rotz = generate_rotation_matrix_Z(j.origin.rpy[1]);
 var rotxyz = matrix_multiply_3(rotx,roty,rotz);
 var transform=matrix_multiply(xyz,rotxyz);
 
 
-var quaternionRot = quaternion_to_rotation_matrix(quaternion_normalize(quaternion_from_axisangle(j.name)));
+console.log(q_names[j.name]);
+
+
+//var xyz = generate_translation_matrix(q_names[j.name].origin.xyz[0], j.origin.xyz[1], j.origin.xyz[2]);
+//var roty = generate_rotation_matrix_Y(q[q_names[j.name]]);
+//var rotx = generate_rotation_matrix_X(j.origin.rpy[2]);
+//var rotz = generate_rotation_matrix_Z(j.origin.rpy[1]);
+//var rotxyz = matrix_multiply_3(rotx,roty,rotz);
+//var transform=matrix_multiply(xyz,rotxyz);
+
+
+	 var qu=[];
+	 qu.y=[];
+	qu.y[0]=Math.cos(q[q_names[j.name]]/2);
+        qu.y[1]=robot.joints[x].axis[0]*Math.sin(q[q_names[j.name]]/2);
+        qu.y[2]=robot.joints[x].axis[1]*Math.sin(q[q_names[j.name]]/2);
+        qu.y[3]=robot.joints[x].axis[2]*Math.sin(q[q_names[j.name]]/2);
+
+var quaternionRot = quaternion_to_rotation_matrix(quaternion_normalize(qu.y));
 
         if ( j.type == 'prismatic'){
-        var transPrism = generate_translation_matrix(j.axis[0]*j.angle, j.axis[1]*j.angle,j.axis[2]* j.angle);
+        var transPrism = generate_translation_matrix(j.axis[0]*q[q_names[j.name]], j.axis[1]*q[q_names[j.name]],j.axis[2]*q[q_names[j.name]]);
         j.xform = matrix_multiply_3(mstack,transform,transPrism);
 
         }
