@@ -188,7 +188,7 @@ var rotxyz = matrix_multiply_3(rotx,roty,rotz);
 var transform=matrix_multiply(xyz,rotxyz);
 
 
-console.log(q_names[j.name]);
+//console.log(q_names[j.name]);
 
 
 //var xyz = generate_translation_matrix(q_names[j.name].origin.xyz[0], j.origin.xyz[1], j.origin.xyz[2]);
