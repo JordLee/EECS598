@@ -6,10 +6,13 @@ Assignment 2: CHECK
   comment: moderate servo performance; overreliance on I term
 Assignment 3: CHECK
   comment: good work
-Assignment 4: DUE
+Assignment 4: CHECK
   error: base control does not properly respond to user input
   comment: robot does not follow heading and lateral directions
   error: joint rotation does not properly respond to user events
-Assignment 5: PENDING
+  regrade: working
+Assignment 5: DUE
+  error: endeffector does not converge to target for all tests
+  warning: endeffector oscillates and overshoots producing jerky (3rd derivative) motion
 Assignment 6: PENDING
 Assignment 7: PENDING
