@@ -181,7 +181,7 @@ function collision_FK_joint(j,mstack,q){
 
 //console.log(j);
 var xyz = generate_translation_matrix(j.origin.xyz[0], j.origin.xyz[1], j.origin.xyz[2]);
-var roty = generate_rotation_matrix_Y(q[q_names[j.name]]);
+var roty = generate_rotation_matrix_Y(j.origin.rpy[0]);
 var rotx = generate_rotation_matrix_X(j.origin.rpy[2]);
 var rotz = generate_rotation_matrix_Z(j.origin.rpy[1]);
 var rotxyz = matrix_multiply_3(rotx,roty,rotz);

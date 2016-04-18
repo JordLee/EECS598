@@ -59,23 +59,6 @@ kineval.planMotionRRTConnect = function motionPlanningRRTConnect() {
 	//console.log(T_a.vertices.length);
 
 
-	var motion_plan_a = [];
-	var motion_plan_b = [];
-//	motion_plan_A = find_path(T_a.vertices[0],T_a,motion_plan_a);
-
-
-	find_path_2(T_a.vertices[0],T_a.vertices[T_a.newest],motion_plan_a);
-	find_path_2_B(T_b.vertices[0],T_b.vertices[T_b.newest],motion_plan_b);
-	A= A.reverse();
-//	B= B.reverse();
-
-	var C =A.concat(B);
-	for (i=0;i<C.length;i++){
-
-	C[i].geom.material.color = { r:1,g:0,b:0 };
-	}
-	kineval.motion_plan = C;
-
 //	for (i=0;i<B.length;i++){
 //
 //	B[i].geom.material.color = { r:1,g:0,b:0 };
@@ -103,6 +86,10 @@ kineval.planMotionRRTConnect = function motionPlanningRRTConnect() {
         else
             kineval.params.update_motion_plan_traversal = false;
 
+
+//	kineval.motion_plan = C;
+
+	console.log("geeting");
         // set robot pose from entry in planned robot path
         robot.origin.xyz = [
             kineval.motion_plan[kineval.motion_plan_traversal_index].vertex[0],
@@ -152,7 +139,9 @@ kineval.robotRRTPlannerInit = function robot_rrt_planner_init() {
     for (x in robot.joints) {
         q_names[x] = q_start_config.length;
 	q_index[q_start_config.length] = x;
-    }
+    
+	q_start_config[q_names[x]] = robot.joints[x].angle;
+	}
 
 	
     //console.log(q_names);
@@ -160,7 +149,7 @@ kineval.robotRRTPlannerInit = function robot_rrt_planner_init() {
     // set goal configuration as the zero configuration
     var i; 
     q_goal_config = new Array(q_start_config.length);
-    for (i=0;i<q_goal_config.length;i++) q_goal_config[i] = 0.001;
+    for (i=0;i<q_goal_config.length;i++) q_goal_config[i] = 0;
 
 
 	q_init = q_start_config;
@@ -168,7 +157,8 @@ kineval.robotRRTPlannerInit = function robot_rrt_planner_init() {
 
 	T_a = tree_init(q_init);
 	T_b = tree_init(q_goal);
-
+	console.log("T_a");
+	console.log(T_a);
 
 
 
@@ -213,8 +203,12 @@ function robot_rrt_planner_iterate() {
 //		console.log(q_new);
 			if (rrt_connect(T_b,T_a.vertices[T_a.newest].vertex) == "reached"){
 			console.log("terminate")
-			return "reached";
+			
+			rrt_iterate = false;
+//			return "reached";
 			}			
+	
+
 		T_c = T_a;
 		T_a = T_b;		 
 		T_b = T_c;
@@ -227,7 +221,27 @@ function robot_rrt_planner_iterate() {
 //	 tree = tree_init(q);
  //      	console.log(tree_add_vertex(tree,q));
 
+	if (rrt_iterate == false){
+	var motion_plan_a = [];
+	var motion_plan_b = [];
+//	motion_plan_A = find_path(T_a.vertices[0],T_a,motion_plan_a);
 
+
+	find_path_2(T_a.vertices[0],T_a.vertices[T_a.newest],motion_plan_a);
+	find_path_2_B(T_b.vertices[0],T_b.vertices[T_b.newest],motion_plan_b);
+	A= A.reverse();
+//	B= B.reverse();
+
+	var C =A.concat(B);
+	for (i=0;i<C.length;i++){
+
+	C[i].geom.material.color = { r:1,g:0,b:0 };
+	}
+	kineval.motion_plan = C;
+	return "reached"
+	}
+
+       // kineval.params.generating_motion_plan = false;
 }
 
 //////////////////////////////////////////////////
@@ -308,7 +322,8 @@ function tree_add_edge(tree,q1_idx,q2_idx) {
 //////////////////////////////////////////////////
 
 function rrt_extend(tree,q) {
-
+//console.log("q in rrtextend");
+//console.log(q);
 qnear = nearest_neighbor(q,tree);
 
 q_near= qnear[1];
@@ -327,7 +342,7 @@ if (new_config(tree,q,q_near)) {
 //	console.log(q_new[0]-q[0]);
 
 
-	if(Math.abs(Math.pow(q_new[0]-q[0],2)+Math.pow(q_new[2]-q[2],2))<0.01){
+	if(Math.sqrt(Math.pow(q_new[0]-q[0],2)+Math.pow(q_new[2]-q[2],2))<stepsize){
 	return "reached"
 	} else{
 
@@ -347,28 +362,51 @@ return "trapped"
 
 function new_config(tree,q,q_near) {
 
-stepsize =0.1;
+stepsize =0.35;
 var q_new = [];
 
-q_new[0]=stepsize*(q[0]-q_near[0])/Math.abs(q[0]-q_near[0])+q_near[0];
-q_new[1]=0;
-q_new[2]=stepsize*(q[2]-q_near[2])/Math.abs(q[2]-q_near[2])+q_near[2];
-
-//console.log(q_names);
-//for (i=0;i< robot.joints.length;i++) {
-//q_new[3+i*3] = q[3];
-//q_new[4+i*3] = 0;
-//q_new[5+i*3] = q[5];
+//if (tree.vertices.length == 1){
+//var q_new_normalize = Math.sqrt(Math.pow(q[0]-q_near[0],2)+Math.pow(q[2]-q_near[2],2));
+//q_new[0]=stepsize*(q[0]-q_near[0])/q_new_normalize+q_near[0];
+//q_new[1]=0;
+//q_new[2]=stepsize*(q[2]-q_near[2])/q_new_normalize+q_near[2];
+//
+////q_new[0] = [0]
+//
+//
+//
+////console.log(q_names);
+////for (i=0;i< robot.joints.length;i++) {
+////q_new[3+i*3] = q[3];
+////q_new[4+i*3] = 0;
+////q_new[5+i*3] = q[5];
+////}
+//
+//q_new[3] = q[3];
+//q_new[4] = q[4];
+//q_new[5] = q[5];
+//
+//	for (x in robot.joints) {
+//
+//      	if (typeof robot.joints[x].limit === 'undefined')
+//	q_new[q_names[x]]=2*(Math.random()-0.5)*(Math.PI);
+//	else
+//	q_new[q_names[x]] = Math.random()*(robot.joints[x].limit.lower-robot.joints[x].limit.upper)+robot.joints[x].limit.lower;
+////	robot.joints[x].limit[0]-robot.joints[x].limit[1]
+//	//q_new[q_names[x]]=2*(Math.random()-0.5)*(Math.PI); 
+//	}
+//
 //}
-
-q_new[3] = q[3];
-q_new[4] = q[4];
-q_new[5] = q[5];
-
-	for (x in robot.joints) {
-	q_new[q_names[x]]=2*(Math.random()-0.5)*(Math.PI); 
-	}
-
+//else{
+//console.log(q);
+//console.log(q_near);
+//console.log(vector_minus_2(q,q_near));
+//console.log("vector_normailize")
+//console.log(vector_normalize_2(vector_minus_2(q,q_near)));
+q_new=vector_plus_2(vector_normalize_2(vector_minus_2(q,q_near)).map(function(x) x*stepsize),q_near);
+//}
+//console.log("q_new");
+//console.log(q_new);
 	if (tree.newest == 0){
 	
 	return q_new
@@ -389,15 +427,31 @@ q_new[5] = q[5];
 
 function nearest_neighbor(q,tree) {
 
-	 distance = [];
+	var  distance = [];
+//	console.log("q");
+//	console.log(q);
+//	for (i=0;i<tree.vertices.length;i++) {
+//	 distance[i] = Math.pow(q[0]-tree.vertices[i].vertex[0],2) + Math.pow(q[2]-tree.vertices[i].vertex[2],2); 
+//
+//
+//	console.log("q[0]");
+//	console.log(q[0]);
+//	console.log("tree.vertices")
+//	console.log(tree.vertices[i].vertex[0]);
+//
+//	}
 
-	for (i=0;i<tree.vertices.length;i++) {
-	
-	 distance[i] = Math.pow(q[0]-tree.vertices[i].vertex[0],2) + Math.pow(q[2]-tree.vertices[i].vertex[2],2); 
+	for ( i = 0; i< tree.vertices.length;i++){
+	distance[i]=vector_distance(q,tree.vertices[i].vertex);
 	}
+	//console.log("distance");
+	//console.log(distance);
 
+	//console.log("index");
 	 nearest_index = distance.indexOf(Math.min(...distance));
-
+	//console.log(nearest_index);
+	//console.log("tree.vertices");
+	//console.log(tree.vertices);
 	return [nearest_index,tree.vertices[nearest_index].vertex]
 
 }
@@ -405,11 +459,31 @@ function nearest_neighbor(q,tree) {
 
 function random_config() {
 
-
+var q_rand = [];
 //	if (robot_collision_forward_kinematics(q)){
-	var q_rand = [  [2*(Math.random()-0.5)*robot_boundary[0][0]],
-                [0],
-              [2*(Math.random()-0.5)*robot_boundary[0][2]],[0],[2*(Math.random()-0.5)*(Math.PI)],[0] ];
+//	var q_rand = [  [2*(Math.random()-0.5)*robot_boundary[0][0]],
+//                [0],
+//              [2*(Math.random()-0.5)*robot_boundary[0][2]],[0],[2*(Math.random()-0.5)*(Math.PI)],[0] ];
+//
+
+q_rand[0] =2*(Math.random()-0.5)*robot_boundary[0][0];
+q_rand[1] = 0; 
+q_rand[2] = 2*(Math.random()-0.5)*robot_boundary[0][2]; 
+q_rand[3] = 0; 
+q_rand[4] = 2*(Math.random()-0.5)*(Math.PI); 
+q_rand[5] = 0; 
+
+
+
+	for (x in robot.joints) {
+
+      	if (typeof robot.joints[x].limit ==='undefined')
+	q_rand[q_names[x]]=2*(Math.random()-0.5)*(Math.PI);
+	else
+	q_rand[q_names[x]] = Math.random()*(robot.joints[x].limit.lower-robot.joints[x].limit.upper)+robot.joints[x].limit.lower;
+//	robot.joints[x].limit[0]-robot.joints[x].limit[1]
+	//q_new[q_names[x]]=2*(Math.random()-0.5)*(Math.PI); 
+	}
 
 	return q_rand
 
@@ -419,14 +493,13 @@ function random_config() {
 
 function rrt_connect(tree,q) {
 //console.log("getting in");
-	var s = "trapped";
-	var s;	
-//	while ( s !== "advanced") {
+	var s = rrt_extend(tree,q);
+	while ( s == "advanced") {
 
 //	console.log("while?");
 	s = rrt_extend(tree,q);
 //	console.log(s);	
-//	}
+	}
 	return s
 }
 
@@ -437,11 +510,11 @@ function find_path_2(TV,tree,motion_plan){
 var k = motion_plan.length;
 
 //console.log(k);
-if (Math.pow(TV.vertex[0]-tree.vertex[0],2) + Math.pow(TV.vertex[2]-tree.vertex[2],2)>0.01){
+//if (Math.pow(TV.vertex[0]-tree.vertex[0],2) + Math.pow(TV.vertex[2]-tree.vertex[2],2)>0.1){
 motion_plan.push(tree);
 //console.log(motion_plan);
-}
-else if(Math.pow(TV.vertex[0]-tree.vertex[0],2) + Math.pow(TV.vertex[2]-tree.vertex[2],2)<0.001){
+//}
+if(Math.pow(TV.vertex[0]-tree.vertex[0],2) + Math.pow(TV.vertex[2]-tree.vertex[2],2)<0.001){
 A = motion_plan;
 //console.log(A);
 
@@ -457,11 +530,11 @@ function find_path_2_B(TVB,treeB,motion_planB){
 var k = motion_planB.length;
 
 //console.log(k);
-if (Math.pow(TVB.vertex[0]-treeB.vertex[0],2) + Math.pow(TVB.vertex[2]-treeB.vertex[2],2)>0.01){
+//if (Math.pow(TVB.vertex[0]-treeB.vertex[0],2) + Math.pow(TVB.vertex[2]-treeB.vertex[2],2)>0.1){
 motion_planB.push(treeB);
 //console.log(motion_plan);
-}
-else if(Math.pow(TVB.vertex[0]-treeB.vertex[0],2) + Math.pow(TVB.vertex[2]-treeB.vertex[2],2)<0.001){
+//}
+if(Math.pow(TVB.vertex[0]-treeB.vertex[0],2) + Math.pow(TVB.vertex[2]-treeB.vertex[2],2)<0.001){
 B = motion_planB;
 //console.log(A);
 

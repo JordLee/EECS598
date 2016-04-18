@@ -102,6 +102,25 @@ return x;
 }
 
 
+function vector_normalize_2(x){
+var norm = 0;
+	for (var i=0;i<x.length;i++) {
+
+	norm = norm + x[i]*x[i];
+	}
+norm = Math.sqrt(norm);
+
+for (var i=0;i<x.length;i++) {
+	x[i] = x[i]/norm;
+
+	}
+	//for (i=0;i<x.length:i++) {
+	return x;
+
+}
+
+
+
  function generate_identity() {
 
  var identity = [
@@ -193,8 +212,29 @@ result[i]=x[i]-y[i];
 return result;
 
 }
+function vector_plus_2(x,y){
+var result=[];
 
+for (var i=0;i<x.length;i++){
+result[i]=x[i]+y[i];
+}
+return result;
 
+}
+function vector_distance(x,y){
+
+var result=[];
+var sum=0;
+for (var i=0;i<x.length;i++){
+result[i]=x[i]-y[i];
+}
+for (var i=0;i<x.length;i++){
+sum = sum + result[i]*result[i];
+}
+sum= Math.sqrt(sum);
+return sum;
+
+}
 
 
     // STENCIL: reference matrix code has the following functions:
