@@ -362,7 +362,7 @@ return "trapped"
 
 function new_config(tree,q,q_near) {
 
-stepsize =0.35;
+stepsize =0.5;
 var q_new = [];
 
 //if (tree.vertices.length == 1){
@@ -413,7 +413,7 @@ q_new=vector_plus_2(vector_normalize_2(vector_minus_2(q,q_near)).map(function(x)
 	}
 
 
-	else if(tree.newest !==0 &&robot_collision_forward_kinematics(q_new)==false){
+	else if(tree.newest !==0 &&kineval.poseIsCollision(q_new)==false){
 //	console.log(robot_collision_forward_kinematics(q_new));
 	return q_new
 	}
