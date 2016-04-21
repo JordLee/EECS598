@@ -112,10 +112,21 @@ function animate() {
     //   tree_add_vertex - adds and displays new configuration vertex for a tree
     //   tree_add_edge - adds and displays new tree edge between configurations
     //   draw_highlighted_path - renders a highlighted path in a tree
+	stepsize = 0.2;
+	numbq = 500;
+	radius = 2; 
 
-    }
+	
+	 rrt_extend(T_a);
 
+
+	
+
+	}
+
+//	draw_highlighted_path(T_a);
 }
+
 
 //////////////////////////////////////////////////
 /////     STENCIL SUPPORT FUNCTIONS
@@ -229,7 +240,7 @@ function tree_init(q) {
     tree.vertices[0] = {};
     tree.vertices[0].vertex = q;
     tree.vertices[0].edges = [];
-
+    tree.vertices[0].cost = [];
     // maintain index of newest vertex added to tree
     tree.newest = 0;
 
@@ -242,15 +253,15 @@ function tree_add_vertex(tree,q) {
     new_vertex = {};
     new_vertex.edges = [];
     new_vertex.vertex = q;
+    new_vertex.cost = tree.vertices[tree.newest].cost;
     tree.vertices.push(new_vertex);
-
+    tree.vertices.push
     // maintain index of newest vertex added to tree
     tree.newest = tree.vertices.length - 1;
 
     // draw location on canvas
     draw_2D_configuration(q);
 }
-
 function draw_2D_configuration(q) {
     // draw location of 2D configuration on canvas
     c = document.getElementById("myCanvas");
@@ -293,7 +304,218 @@ function tree_add_edge(tree,q1_idx,q2_idx) {
     //   nearest_neighbor
     //   find_path
     //   path_dfs
+function rrt_extend(tree){
+//	for (var i=0;i<numbq;i++){
+//
+//	var q_rand = random_config();
+//	var nn = tree.vertices[0];
+//		for (var p=0;p<tree.vertices.length;p++){
+//			if (vector_distance(tree.vertices[p].vertex,q_rand) < vector_distance(nn.vertex,q_rand)){
+//			nn = tree.vertices[0];
+//			}
+//		inter_node = steer(nn.vertex,q_rand);
+//
+//		}
+//
+//	newnode = tree_init(inter_node);
+//	[newnode,nn,q_near_index]=choose_parent(nn,newnode,tree);
+//	tree_add_vertex(newnode,nn.vertex);
+//	tree_add_edge(newnode,q_near_index,tree.newest);
+//
+//
+//
+//    	}
 
+	 q_rand = random_config();
+	 q_nearest = nearest_neighbor(q_rand,tree);
+	var q_nearest_index=q_nearest[0];
+	var q_nearest = q_nearest[1];
+	 q_new = steer(q_nearest,q_rand);
+    
+	if (collision_test(q_new)==false){
+      		 Q_near = near_vertices(q_new,tree);
+		 q_min = choose_parent(Q_near,q_nearest,q_nearest_index,q_new,tree);
+		 q_min_index = index_find(q_min,tree);
+		insert_node(q_min,q_new,tree,q_min_index,tree.newest);
+	//	q_new_index = index_find(q_new,tree);
+		tree= rewire(tree,Q_near,q_min,q_new);
+		q_min_index = index_find(q_min,tree);
+		q_new_index = index_find(q_new,tree);
+		tree_add_vertex(tree,q_new);
+		tree_add_edge(tree,q_min_index,tree.newest);
+
+
+	} 				 
+	
+	if (vector_distance(q_new,q_goal) < stepsize){
+	rrt_iterate =false; 
+	
+	q_min_index = index_find(q_min,tree);
+	var motion_plan =[];
+	find_path(tree.vertices[q_min_index],motion_plan);
+
+		
+	draw_highlighted_path(A);
+	
+	}
+
+}
+
+function find_path(tree,motion_plan){
+var k = motion_plan.length;
+motion_plan.push(tree);
+
+if (vector_distance(tree.vertex,q_init) < stepsize){
+	A = motion_plan;
+	return;
+
+	}
+console.log(motion_plan);
+find_path(tree.edges[0],motion_plan);
+
+}
+function insert_node(q_current,q_new,tree,q_current_index,q_new_index) {
+
+tree_add_vertex(tree,q_new);
+//tree_add_edge(tree,q_current_index,q_new_index);
+
+
+}
+function index_find(q,tree){
+
+	for ( var i=0 ; i<tree.vertices.length; i++){
+		if (q == tree.vertices[i].vertex)
+		return i
+	}
+}
+
+function nearest_neighbor(q,tree) {
+	var  distance = [];
+
+        for ( i = 0; i< tree.vertices.length;i++){
+        distance[i]=vector_distance(q,tree.vertices[i].vertex);
+//	console.log(distance); 
+     }
+        nearest_index = distance.indexOf(Math.min(...distance));
+       return [nearest_index,tree.vertices[nearest_index].vertex]
+
+}
+
+function near_vertices(q,tree) {
+	gamma = 10;
+	var n = tree.vertices.length;
+	var l = gamma*(Math.log(n)/n);
+	var Z = [];
+	var Q =[];
+	for (var i=0;i<tree.vertices.length;i++) {
+	
+		if (i==0)
+		Q.push(tree.vertices[0]);
+	
+		else if (vector_distance(q,tree.vertices[i].vertex) <= l)
+	 	Q.push(tree.vertices[i]);
+	
+	}
+	//console.log(Q);
+	return Q;
+
+}
+
+
+function random_config() {
+
+var q_rand = [];
+
+q_rand[0] = Math.random()*(range[3][0][0]-range[0][0][0]) + range[0][0][0];
+q_rand[1] = Math.random()*(range[3][0][1]-range[2][0][1]) + range[2][0][1]; 
+
+	if (collision_test(q_rand)==false) 
+	return q_rand
+}
+
+
+function steer(q1,q2) {
+
+	if (vector_distance(q1,q2) < stepsize)
+	return q2
+	else{
+	var theta = Math.atan2(q2[1]-q1[1],q2[0]-q1[0]);
+	return [q1[0] + stepsize*Math.cos(theta), q1[1] + stepsize*Math.sin(theta)];
+ 	}
+}
+
+function choose_parent(Q_near,q_nearest,q_nearest_index,q_new,tree){
+	var q_min = q_nearest;
+	var c_min = vector_distance(q_new,tree.vertices[0].vertex) + tree.vertices[q_nearest_index].cost;
+	for(var p=0;p<Q_near.length;p++){
+
+		var q_prime = steer(Q_near[p].vertex,q_new);
+		if (collision_test(q_prime)==false && (q_prime == q_new)){
+			//console.log("if");
+			c_prime = Q_near[p].cost + vector_distance(q_new,tree.vertices[0].vertex);
+//		if ((vector_distance(tree.vertices[p].vertex,newnode.vertices[0].vertex)< radius) && tree.vertices[p].cost + vector_distance(tree.vertices[p].vertex,newnode.vertices[0].vertex)< nn.cost + vector_distance(nn.vertex,newnode.vertices[0].vertex)){
+
+			if ((c_prime < tree.vertices[tree.newest].cost) && (c_prime < c_min)) 
+					q_min = Q_near[p].vertex;
+		}
+	}
+
+return q_min
+
+
+//		var nn = tree.vertices[p];
+//		 q_near_index = p;
+//		console.log("if");
+//		}
+//	
+//	newnode.cost = nn.cost + vector_distance(nn.vertex,newnode.vertices[0].vertex);
+//	}
+//	newnode.edges[0] = nn;
+//
+//	
+//	return [newnode, nn, q_near_index]
+//
+}
+	
+
+function rewire(tree,Q_near,q_min,q_new){
+//	for (var i=0;i<nodes.vertices.length;i++){
+//		var p = nodes.vertices[i];
+//		if (p !== tree.vertices.edges[0] && vector_distance(p.vertex,newnode.vertex) < p.cost){
+//			p.edges[0] = newnode;
+//			p.cost = newnode.cost + vector_distance(p.vertex,newnode.vertex);
+//			nodes.vertices[i] = p;
+//
+//		}	
+//	}
+//	return nodes
+
+	for (var i=0; i<Q_near.length;i++) {
+	var q_prime = steer(q_new,Q_near[i].vertex);
+		if ((collision_test(q_prime)==false) && (q_prime == Q_near[i].vertex) &&(tree.vertices[tree.newest].cost+vector_distance(q_prime,tree.vertices[0].vertex)<Q_near[i].cost))
+		Q_near[i].edges[0]=q_new;
+	}
+
+return tree 
+
+
+
+}
+
+function vector_distance(x,y){
+
+var result=[];
+var sum=0;
+for (var i=0;i<x.length;i++){
+result[i]=x[i]-y[i];
+}
+for (var i=0;i<x.length;i++){
+sum = sum + result[i]*result[i];
+}
+sum= Math.sqrt(sum);
+return sum;
+
+}
 </script>
 
 

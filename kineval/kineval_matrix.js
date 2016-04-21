@@ -221,6 +221,7 @@ result[i]=x[i]+y[i];
 return result;
 
 }
+
 function vector_distance(x,y){
 
 var result=[];
