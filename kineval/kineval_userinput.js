@@ -60,6 +60,11 @@ kineval.handleUserInput = function user_input() {
     if ( keyboard.pressed("m") )
         kineval.params.update_motion_plan = true;
 
+ 
+     if( keyboard.pressed("2"))
+	rrt_alg = 2;
+
+
     // traverse generated motion plan
     if ( keyboard.pressed("n") |  keyboard.pressed("b")) {
 
@@ -109,8 +114,9 @@ kineval.handleUserInput = function user_input() {
             textbar.innerHTML = "inverse kinematics controller has been invoked";
     }
     if (kineval.params.generating_motion_plan) 
-        textbar.innerHTML = "motion planner has been invoked in the background";
-
+        textbar.innerHTML = "motion planner has been invoked in the background with rrt-connect as default. Press 2 to execute RRT *";   
+     if (typeof rrt_alg !=='undefined' && rrt_alg == 2)
+	textbar.innerHTML = "rrt *";
 
 
     // incrment/decrement angle of active joint 
@@ -198,8 +204,8 @@ kineval.handleUserInput = function user_input() {
         kineval.setPoseSetpoint(1);
     if (keyboard.pressed("shift+2"))
         kineval.assignPoseSetpoint(2);
-    else if (keyboard.pressed("2"))
-        kineval.setPoseSetpoint(2);
+//    else if (keyboard.pressed("2"))
+//        kineval.setPoseSetpoint(2);
     if (keyboard.pressed("shift+3"))
         kineval.assignPoseSetpoint(3);
     else if (keyboard.pressed("3"))

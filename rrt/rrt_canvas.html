@@ -112,7 +112,7 @@ function animate() {
     //   tree_add_vertex - adds and displays new configuration vertex for a tree
     //   tree_add_edge - adds and displays new tree edge between configurations
     //   draw_highlighted_path - renders a highlighted path in a tree
-	stepsize = 0.2;
+	stepsize = 0.1;
 	numbq = 500;
 	radius = 2; 
 
@@ -255,7 +255,7 @@ function tree_add_vertex(tree,q) {
     new_vertex.vertex = q;
     new_vertex.cost = tree.vertices[tree.newest].cost;
     tree.vertices.push(new_vertex);
-    tree.vertices.push
+  //  tree.vertices.push
     // maintain index of newest vertex added to tree
     tree.newest = tree.vertices.length - 1;
 
@@ -305,54 +305,43 @@ function tree_add_edge(tree,q1_idx,q2_idx) {
     //   find_path
     //   path_dfs
 function rrt_extend(tree){
-//	for (var i=0;i<numbq;i++){
-//
-//	var q_rand = random_config();
-//	var nn = tree.vertices[0];
-//		for (var p=0;p<tree.vertices.length;p++){
-//			if (vector_distance(tree.vertices[p].vertex,q_rand) < vector_distance(nn.vertex,q_rand)){
-//			nn = tree.vertices[0];
-//			}
-//		inter_node = steer(nn.vertex,q_rand);
-//
-//		}
-//
-//	newnode = tree_init(inter_node);
-//	[newnode,nn,q_near_index]=choose_parent(nn,newnode,tree);
-//	tree_add_vertex(newnode,nn.vertex);
-//	tree_add_edge(newnode,q_near_index,tree.newest);
-//
-//
-//
-//    	}
 
-	 q_rand = random_config();
-	 q_nearest = nearest_neighbor(q_rand,tree);
+
+	var q_rand = random_config();
+	var q_nearest = nearest_neighbor(q_rand,tree);
 	var q_nearest_index=q_nearest[0];
 	var q_nearest = q_nearest[1];
 	 q_new = steer(q_nearest,q_rand);
     
 	if (collision_test(q_new)==false){
-      		 Q_near = near_vertices(q_new,tree);
-		 q_min = choose_parent(Q_near,q_nearest,q_nearest_index,q_new,tree);
-		 q_min_index = index_find(q_min,tree);
-		insert_node(q_min,q_new,tree,q_min_index,tree.newest);
-	//	q_new_index = index_find(q_new,tree);
-		tree= rewire(tree,Q_near,q_min,q_new);
-		q_min_index = index_find(q_min,tree);
-		q_new_index = index_find(q_new,tree);
+      		var Q_near = near_vertices(q_new,tree);
+		var q_min = choose_parent(Q_near,q_nearest,q_nearest_index,q_new,tree);
+		var q_min_index = index_find(q_min,tree);
+	 //	tree_add_vertex(tree,q_new);
 		tree_add_vertex(tree,q_new);
 		tree_add_edge(tree,q_min_index,tree.newest);
+		tree= rewire(tree,Q_near,q_min,q_new);
 
+//		q_new_final_index = index_find(q_new,tree);	
 
 	} 				 
 	
 	if (vector_distance(q_new,q_goal) < stepsize){
 	rrt_iterate =false; 
 	
-	q_min_index = index_find(q_min,tree);
+//	tree_add_vertex(tree,q_new);
+//	q_new_index = index_find(q_new,tree); //does not have a q_new index.. why??
+		var Q_near = near_vertices(q_new,tree);
+		var q_min = choose_parent(Q_near,q_nearest,q_nearest_index,q_new,tree);
+		var q_min_index = index_find(q_min,tree);
+	 //	tree_add_vertex(tree,q_new);
+		tree= rewire(tree,Q_near,q_min,q_new);
+		tree_add_vertex(tree,q_new);
+		tree_add_edge(tree,q_min_index,tree.newest);
+		q_new_index = index_find(q_new,tree);
 	var motion_plan =[];
-	find_path(tree.vertices[q_min_index],motion_plan);
+	
+	find_path(tree.vertices[q_new_index],motion_plan);
 
 		
 	draw_highlighted_path(A);
@@ -384,7 +373,7 @@ tree_add_vertex(tree,q_new);
 function index_find(q,tree){
 
 	for ( var i=0 ; i<tree.vertices.length; i++){
-		if (q == tree.vertices[i].vertex)
+		if (vector_distance(q,tree.vertices[i].vertex)<0.001)
 		return i
 	}
 }

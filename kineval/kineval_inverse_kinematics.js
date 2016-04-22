@@ -244,7 +244,8 @@ target_rpy[2]=0;
 	}
 
 
-	if ( kineval.params.ik_orientation_included === false){
+	 if ( kineval.params.ik_orientation_included === false){
+
 
 
 	var n=dq.length-1;
@@ -260,14 +261,17 @@ joint_axis[0]=[]; joint_axis[1]=[]; joint_axis[2]=[]; joint_axis[3]=[];
 joint_axis[0][0]=robot.joints[l].axis[0];
 joint_axis[1][0]=robot.joints[l].axis[1];
 joint_axis[2][0]=robot.joints[l].axis[2];
-joint_axis[3][0]=1;
+joint_axis[3][0]=0;
 var zi=matrix_multiply(robot.joints[l].xform,joint_axis);
 
 //var zi =robot.joints[l].axis;
 var Oi=matrix_multiply(robot.joints[l].xform,[[0],[0],[0],[1]]);
-zi[0][0] = zi[0][0]-Oi[0][0];
-zi[1][0] = zi[1][0]-Oi[1][0];
-zi[2][0] = zi[2][0]-Oi[2][0];
+//var zi_2=[];
+//zi_2[0]=[];zi_2[1]=[];zi_2[2]=[];
+
+//zi[0][0] = zi[0][0]-Oi[0][0];
+//zi[1][0] = zi[1][0]-Oi[1][0];
+//zi[2][0] = zi[2][0]-Oi[2][0];
 
 
 var On=matrix_multiply(robot.joints[l].xform,endeffector_position_local);

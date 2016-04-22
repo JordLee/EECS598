@@ -53,7 +53,7 @@ kineval.planMotionRRTConnect = function motionPlanningRRTConnect() {
         if (rrt_result === "reached") {
             kineval.params.update_motion_plan = false; // KE T needed due to slight timing issue
             kineval.params.generating_motion_plan = false;
-            textbar.innerHTML = "planner execution complete";
+            textbar.innerHTML = "planner execution complete. Press 2 to execute RRT *";
             kineval.params.planner_state = "complete";
         
 	//console.log(T_a.vertices.length);
@@ -175,10 +175,11 @@ kineval.robotRRTPlannerInit = function robot_rrt_planner_init() {
 function robot_rrt_planner_iterate() {
 
     var i;
+    if (typeof rrt_alg === 'undefined'){
     rrt_alg = 1;  // 0: basic rrt (OPTIONAL), 1: rrt_connect (REQUIRED)
-
-    if (rrt_iterate && (Date.now()-cur_time > 10)) {
-        cur_time = Date.now();
+    }		
+   if (rrt_iterate && (Date.now()-cur_time > 10)) {
+          cur_time = Date.now();
 
     // STENCIL: implement single rrt iteration here. an asynch timing mechanism 
     //   is used instead of a for loop to avoid blocking and non-responsiveness 
@@ -193,7 +194,7 @@ function robot_rrt_planner_iterate() {
     //   tree_init - creates a tree of configurations
     //   tree_add_vertex - adds and displays new configuration vertex for a tree
     //   tree_add_edge - adds and displays new tree edge between configurations
-
+	if (rrt_alg == 1){
 	var q_rand = random_config();
 
 //console.log(rrt_extend(T_a,q_rand));
@@ -217,7 +218,7 @@ function robot_rrt_planner_iterate() {
 
 
 //	rrt_extend(T_a,q_rand);
-    }
+    
 //	 tree = tree_init(q);
  //      	console.log(tree_add_vertex(tree,q));
 
@@ -233,15 +234,37 @@ function robot_rrt_planner_iterate() {
 //	B= B.reverse();
 
 	var C =A.concat(B);
-	for (i=0;i<C.length;i++){
+		for (i=0;i<C.length;i++){
 
-	C[i].geom.material.color = { r:1,g:0,b:0 };
-	}
+		C[i].geom.material.color = { r:1,g:0,b:0 };
+		}
 	kineval.motion_plan = C;
 	return "reached"
 	}
 
+	
        // kineval.params.generating_motion_plan = false;
+	}
+	if (rrt_alg == 2){
+
+	rrt_extend_2(T_a);
+
+		if (rrt_iterate == false){
+			kineval.motion_plan = D;
+			for (var i=0;i<D.length;i++){
+
+			D[i].geom.material.color = { r:0,g:0,b:1 };
+			}
+		return "reached"
+		}
+
+	}
+
+
+
+   }
+
+
 }
 
 //////////////////////////////////////////////////
@@ -258,7 +281,7 @@ function tree_init(q) {
     tree.vertices[0] = {};
     tree.vertices[0].vertex = q;
     tree.vertices[0].edges = [];
-
+    tree.vertices[0].cost = [];
     // create rendering geometry for base location of vertex configuration
     add_config_origin_indicator_geom(tree.vertices[0]);
 
@@ -275,7 +298,7 @@ function tree_add_vertex(tree,q) {
     var new_vertex = {};
     new_vertex.edges = [];
     new_vertex.vertex = q;
-
+    new_vertex.cost = tree.vertices[tree.newest].cost;
     // create rendering geometry for base location of vertex configuration
     add_config_origin_indicator_geom(new_vertex);
 
@@ -428,30 +451,13 @@ q_new=vector_plus_2(vector_normalize_2(vector_minus_2(q,q_near)).map(function(x)
 function nearest_neighbor(q,tree) {
 
 	var  distance = [];
-//	console.log("q");
-//	console.log(q);
-//	for (i=0;i<tree.vertices.length;i++) {
-//	 distance[i] = Math.pow(q[0]-tree.vertices[i].vertex[0],2) + Math.pow(q[2]-tree.vertices[i].vertex[2],2); 
-//
-//
-//	console.log("q[0]");
-//	console.log(q[0]);
-//	console.log("tree.vertices")
-//	console.log(tree.vertices[i].vertex[0]);
-//
-//	}
-
 	for ( i = 0; i< tree.vertices.length;i++){
 	distance[i]=vector_distance(q,tree.vertices[i].vertex);
 	}
-	//console.log("distance");
-	//console.log(distance);
-
-	//console.log("index");
+		//console.log(distance);
 	 nearest_index = distance.indexOf(Math.min(...distance));
-	//console.log(nearest_index);
-	//console.log("tree.vertices");
-	//console.log(tree.vertices);
+//	console.log(nearest_index);
+
 	return [nearest_index,tree.vertices[nearest_index].vertex]
 
 }
@@ -548,6 +554,158 @@ find_path_2_B(TVB,treeB.edges[0],motion_planB);
 
 }
 
+function rrt_extend_2(tree){
+
+var q_rand = random_config();
+var q_nearest = nearest_neighbor(q_rand,tree);
+var q_nearest_index=q_nearest[0];
+
+var q_nearest = q_nearest[1];
+var q_new = steer(q_nearest,q_rand);
+//console.log("q_new");
+//console.log(q_new);
+      if (kineval.poseIsCollision(q_new)==false){
+                var Q_near = near_vertices(q_new,tree);
+//		console.log("Q_near");
+//		console.log(Q_near);
+                var q_min = choose_parent(Q_near,q_nearest,q_nearest_index,q_new,tree);
+//		console.log("q_min");
+//		console.log(q_min);
+                var q_min_index = index_find(q_min,tree);
+//		console.log("q_min_index");
+//		console.log(q_min_index);
+                tree_add_vertex(tree,q_new);
+                tree_add_edge(tree,q_min_index,tree.newest);
+                tree= rewire(tree,Q_near,q_min,q_new);
+
+//              q_new_final_index = index_find(q_new,tree);
+
+        }
+
+        if ((kineval.poseIsCollision(q_new)==false)&&Math.sqrt(Math.pow(q_new[0]-q_goal[0],2)+Math.pow(q_new[2]-q_goal[2],2))<0.3){
+	console.log("if?");
+	//return "reached"
+        rrt_iterate =false;
+
+//      tree_add_vertex(tree,q_new);
+//      q_new_index = index_find(q_new,tree); //does not have a q_new index.. why??
+                var Q_near = near_vertices(q_new,tree);
+                var q_min = choose_parent(Q_near,q_nearest,q_nearest_index,q_new,tree);
+                var q_min_index = index_find(q_min,tree);
+         //     tree_add_vertex(tree,q_new);
+                tree= rewire(tree,Q_near,q_min,q_new);
+                tree_add_vertex(tree,q_new);
+                tree_add_edge(tree,q_min_index,tree.newest);
+                q_new_index = index_find(q_new,tree);
+        var motion_plan =[];
+
+        find_path(tree.vertices[q_new_index],motion_plan);
+
+
+	}
+	
+
+
+}
+
+function find_path(tree,motion_plan){
+var k = motion_plan.length;
+motion_plan.push(tree);
+
+if (vector_distance(tree.vertex,q_init) < stepsize){
+        D = motion_plan;
+        return;
+
+        }
+console.log(motion_plan);
+find_path(tree.edges[0],motion_plan);
+
+}
+
+function index_find(q,tree){
+
+        for ( var i=0 ; i<tree.vertices.length; i++){
+                if (vector_distance(q,tree.vertices[i].vertex)<0.001)
+                return i
+        }
+}
+function near_vertices(q,tree) {
+        gamma = 10;
+        var n = tree.vertices.length;
+        var l = gamma*(Math.log(n)/n);
+        var Z = [];
+        var Q =[];
+        for (var i=0;i<tree.vertices.length;i++) {
+
+                if (i==0)
+                Q.push(tree.vertices[0]);
+
+                else if (vector_distance(q,tree.vertices[i].vertex) <= l)
+                Q.push(tree.vertices[i]);
+
+        }
+        //console.log(Q);
+        return Q;
+
+}
+function steer(q1,q2) {
+
+        if (vector_distance(q1,q2) < stepsize)
+        return q2
+        else{
+      var theta = Math.atan2(q2[2]-q1[2],q2[0]-q1[0]);
+	var q = [];
+      q[0]= q1[0] + stepsize*Math.cos(theta);
+      q[1] =q2[1];
+      q[2]= q1[2] + stepsize*Math.sin(theta);
+      q[3]= q2[3];	
+      q[4]= q2[4];	
+      q[5]= q2[5];	
+
+
+	
+		for (x in robot.joints) {
+
+		q[q_names[x]]=q2[q_names[x]];
+		}
+        
+	return q;
+	}
+}
+function choose_parent(Q_near,q_nearest,q_nearest_index,q_new,tree){
+        var q_min = q_nearest;
+        var c_min = vector_distance(q_new,tree.vertices[0].vertex) + tree.vertices[q_nearest_index].cost;
+        for(var p=0;p<Q_near.length;p++){
+
+                var q_prime = steer(Q_near[p].vertex,q_new);
+               if (kineval.poseIsCollision(q_prime)==false && (q_prime == q_new)){
+//                   if ((q_prime == q_new)){
+                        //console.log("if");
+                        c_prime = Q_near[p].cost + vector_distance(q_new,tree.vertices[0].vertex);
+//              if ((vector_distance(tree.vertices[p].vertex,newnode.vertices[0].vertex)< radius) && tree.vertices[p].cost + vector_distance(tree.vertices[p].vertex,newnode.vertices[0].vertex)< nn.cost + vector_distance(nn.vertex,newnode.vertices[0].vertex)){
+
+                        if ((c_prime < tree.vertices[tree.newest].cost) && (c_prime < c_min))
+                                        q_min = Q_near[p].vertex;
+                }
+        }
+
+return q_min
+}
+
+function rewire(tree,Q_near,q_min,q_new){
+
+        for (var i=0; i<Q_near.length;i++) {
+        var q_prime = steer(q_new,Q_near[i].vertex);
+               if((kineval.poseIsCollision(q_prime)==false) && (q_prime == Q_near[i].vertex) &&(tree.vertices[tree.newest].cost+vector_distance(q_prime,tree.vertices[0].vertex)<Q_near[i].cost))
+          //        if((q_prime == Q_near[i].vertex) &&(tree.vertices[tree.newest].cost+vector_distance(q_prime,tree.vertices[0].vertex)<Q_near[i].cost))
+                 Q_near[i].edges[0]=q_new;
+        }
+
+return tree
+
+
+
+}
 
     // STENCIL: implement RRT-Connect functions here, such as:
     //   rrt_extend

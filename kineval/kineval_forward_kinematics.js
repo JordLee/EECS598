@@ -100,7 +100,7 @@ var quaternionRot = quaternion_to_rotation_matrix(quaternion_normalize(quaternio
 	robot.joints[j].xform = matrix_multiply_3(mstack,transform,transPrism);
 
 	}
-	else if (robot.joints[j].type == 'revolute') {
+	else if (robot.joints[j].type == 'revolute'||robot.joints[j].type == 'continuous'||typeof robot.joints[j].type==='undefined') {
 
 	robot.joints[j].xform = matrix_multiply_3(mstack,transform,quaternionRot);
 	}
