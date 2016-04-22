@@ -114,7 +114,7 @@ kineval.handleUserInput = function user_input() {
             textbar.innerHTML = "inverse kinematics controller has been invoked";
     }
     if (kineval.params.generating_motion_plan) 
-        textbar.innerHTML = "motion planner has been invoked in the background with rrt-connect as default. Press 2 to execute RRT *";   
+        textbar.innerHTML = "motion planner has been invoked in the background with rrt-connect as default.";   
      if (typeof rrt_alg !=='undefined' && rrt_alg == 2)
 	textbar.innerHTML = "rrt *";
 
