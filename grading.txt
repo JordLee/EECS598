@@ -14,6 +14,17 @@ Assignment 4: CHECK
 Assignment 5: DUE
   error: endeffector does not converge to target for all tests
   warning: endeffector oscillates and overshoots producing jerky (3rd derivative) motion
-Assignment 6: PENDING
+  regrade: error: endeffector does not converge to target for all tests
+  warning: endeffector oscillates and overshoots producing jerky (3rd derivative) motion
+Assignment 6: DUE
+  error: RRT Star planner not implemented
+  error: planner does not return motion path solution
+  comment: planner fails on public test barrier
+  warning: base control does not properly respond to user input
+  warning: joint cylinders do not render in alignment with joint axes
+  warning: URL specified robot does not load at run time
 Assignment 7: CHECK
 
+
+Points: 75
+Grade: PENDING
