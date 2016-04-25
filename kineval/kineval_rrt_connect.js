@@ -176,7 +176,7 @@ function robot_rrt_planner_iterate() {
 
     var i;
     if (typeof rrt_alg === 'undefined'){
-    rrt_alg = 1;  // 0: basic rrt (OPTIONAL), 1: rrt_connect (REQUIRED)
+    rrt_alg = 2;  // 0: basic rrt (OPTIONAL), 1: rrt_connect (REQUIRED) 2: rrt_*
     }		
    if (rrt_iterate && (Date.now()-cur_time > 10)) {
           cur_time = Date.now();
@@ -246,7 +246,7 @@ function robot_rrt_planner_iterate() {
        // kineval.params.generating_motion_plan = false;
 	}
 	if (rrt_alg == 2){
-
+	stepsize= 0.5;
 	rrt_extend_2(T_a);
 
 		if (rrt_iterate == false){
