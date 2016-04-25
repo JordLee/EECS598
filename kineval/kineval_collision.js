@@ -210,22 +210,22 @@ var quaternionRot = quaternion_to_rotation_matrix(quaternion_normalize(qu.y));
 
         if ( j.type == 'prismatic'){
         var transPrism = generate_translation_matrix(j.axis[0]*q[q_names[j.name]], j.axis[1]*q[q_names[j.name]],j.axis[2]*q[q_names[j.name]]);
-        j.xform = matrix_multiply_3(mstack,transform,transPrism);
+        new_xform = matrix_multiply_3(mstack,transform,transPrism);
 
         }
         else if (j.type == 'revolute') {
 
-        j.xform = matrix_multiply_3(mstack,transform,quaternionRot);
+        new_xform = matrix_multiply_3(mstack,transform,quaternionRot);
         }
 
         else if (j.type == 'fixed'){
 
-        j.xform = matrix_multiply(mstack,transform);
+        new_xform = matrix_multiply(mstack,transform);
 
         }
 
         else {
-        j.xform = matrix_multiply_3(mstack,transform,quaternionRot);
+        new_xform = matrix_multiply_3(mstack,transform,quaternionRot);
         }
 
 
@@ -233,7 +233,7 @@ var quaternionRot = quaternion_to_rotation_matrix(quaternion_normalize(qu.y));
 //var l = robot.joints[j].child;
 var l = robot.links[j.child];
 //console.log(j.xform);
-var mstack = j.xform;
+var mstack = new_xform;
 //traverseFKLinkFetch(mstack,l);
 
 //consola.log(l);

@@ -176,7 +176,7 @@ function robot_rrt_planner_iterate() {
 
     var i;
     if (typeof rrt_alg === 'undefined'){
-    rrt_alg = 2;  // 0: basic rrt (OPTIONAL), 1: rrt_connect (REQUIRED) 2: rrt_*
+    rrt_alg =2 ;  // 0: basic rrt (OPTIONAL), 1: rrt_connect (REQUIRED) 2: rrt_*
     }		
    if (rrt_iterate && (Date.now()-cur_time > 10)) {
           cur_time = Date.now();
@@ -389,10 +389,10 @@ stepsize =0.5;
 var q_new = [];
 
 //if (tree.vertices.length == 1){
-//var q_new_normalize = Math.sqrt(Math.pow(q[0]-q_near[0],2)+Math.pow(q[2]-q_near[2],2));
-//q_new[0]=stepsize*(q[0]-q_near[0])/q_new_normalize+q_near[0];
-//q_new[1]=0;
-//q_new[2]=stepsize*(q[2]-q_near[2])/q_new_normalize+q_near[2];
+var q_new_normalize = Math.sqrt(Math.pow(q[0]-q_near[0],2)+Math.pow(q[2]-q_near[2],2));
+q_new[0]=stepsize*(q[0]-q_near[0])/q_new_normalize+q_near[0];
+q_new[1]=0;
+q_new[2]=stepsize*(q[2]-q_near[2])/q_new_normalize+q_near[2];
 //
 ////q_new[0] = [0]
 //
@@ -405,11 +405,11 @@ var q_new = [];
 ////q_new[5+i*3] = q[5];
 ////}
 //
-//q_new[3] = q[3];
-//q_new[4] = q[4];
-//q_new[5] = q[5];
+q_new[3] = q[3];
+q_new[4] = q[4];
+q_new[5] = q[5];
 //
-//	for (x in robot.joints) {
+	for (x in robot.joints) {
 //
 //      	if (typeof robot.joints[x].limit === 'undefined')
 //	q_new[q_names[x]]=2*(Math.random()-0.5)*(Math.PI);
@@ -417,7 +417,8 @@ var q_new = [];
 //	q_new[q_names[x]] = Math.random()*(robot.joints[x].limit.lower-robot.joints[x].limit.upper)+robot.joints[x].limit.lower;
 ////	robot.joints[x].limit[0]-robot.joints[x].limit[1]
 //	//q_new[q_names[x]]=2*(Math.random()-0.5)*(Math.PI); 
-//	}
+	q_new[q_names[x]] = q[q_names[x]];
+	}
 //
 //}
 //else{
@@ -426,7 +427,7 @@ var q_new = [];
 //console.log(vector_minus_2(q,q_near));
 //console.log("vector_normailize")
 //console.log(vector_normalize_2(vector_minus_2(q,q_near)));
-q_new=vector_plus_2(vector_normalize_2(vector_minus_2(q,q_near)).map(function(x) x*stepsize),q_near);
+//q_new=vector_plus_2(vector_normalize_2(vector_minus_2(q,q_near)).map(function(x) x*stepsize),q_near);
 //}
 //console.log("q_new");
 //console.log(q_new);
@@ -452,7 +453,8 @@ function nearest_neighbor(q,tree) {
 
 	var  distance = [];
 	for ( i = 0; i< tree.vertices.length;i++){
-	distance[i]=vector_distance(q,tree.vertices[i].vertex);
+	//distance[i]=vector_distance(q,tree.vertices[i].vertex);
+        distance[i] = Math.sqrt(Math.pow(q[0]-tree.vertices[i].vertex[0],2)+Math.pow(q[2]-tree.vertices[i].vertex[2],2));
 	}
 		//console.log(distance);
 	 nearest_index = distance.indexOf(Math.min(...distance));
@@ -582,7 +584,7 @@ var q_new = steer(q_nearest,q_rand);
 
         }
 
-        if ((kineval.poseIsCollision(q_new)==false)&&Math.sqrt(Math.pow(q_new[0]-q_goal[0],2)+Math.pow(q_new[2]-q_goal[2],2))<0.3){
+        if ((kineval.poseIsCollision(q_new)==false)&&Math.sqrt(Math.pow(q_new[0]-q_goal[0],2)+Math.pow(q_new[2]-q_goal[2],2))<stepsize){
 	console.log("if?");
 	//return "reached"
         rrt_iterate =false;
@@ -610,9 +612,12 @@ var q_new = steer(q_nearest,q_rand);
 
 function find_path(tree,motion_plan){
 var k = motion_plan.length;
+console.log("finnd");
 motion_plan.push(tree);
 
-if (vector_distance(tree.vertex,q_init) < stepsize){
+//if (vector_distance(tree.vertex,q_init) < stepsize){
+
+if (Math.sqrt(Math.pow(q_init[0]-tree.vertex[0],2)+Math.pow(q_init[2]-tree.vertex[2],2))<0.01){
         D = motion_plan;
         return;
 
@@ -625,7 +630,8 @@ find_path(tree.edges[0],motion_plan);
 function index_find(q,tree){
 
         for ( var i=0 ; i<tree.vertices.length; i++){
-                if (vector_distance(q,tree.vertices[i].vertex)<0.001)
+//                if (vector_distance(q,tree.vertices[i].vertex)<0.001)
+	if (Math.sqrt(Math.pow(q[0]-tree.vertices[i].vertex[0],2)+Math.pow(q[2]-tree.vertices[i].vertex[2],2))<0.001)
                 return i
         }
 }
@@ -640,7 +646,8 @@ function near_vertices(q,tree) {
                 if (i==0)
                 Q.push(tree.vertices[0]);
 
-                else if (vector_distance(q,tree.vertices[i].vertex) <= l)
+//                else if (vector_distance(q,tree.vertices[i].vertex) <= l)
+		else if (Math.sqrt(Math.pow(q[0]-tree.vertices[i].vertex[0],2)+Math.pow(q[2]-tree.vertices[i].vertex[2],2))<=l)
                 Q.push(tree.vertices[i]);
 
         }
@@ -650,7 +657,9 @@ function near_vertices(q,tree) {
 }
 function steer(q1,q2) {
 
-        if (vector_distance(q1,q2) < stepsize)
+//        if (vector_distance(q1,q2) < stepsize)
+	if (Math.sqrt(Math.pow(q1[0]-q2[0],2)+Math.pow(q1[2]-q2[2],2))<stepsize)
+
         return q2
         else{
       var theta = Math.atan2(q2[2]-q1[2],q2[0]-q1[0]);
@@ -674,15 +683,18 @@ function steer(q1,q2) {
 }
 function choose_parent(Q_near,q_nearest,q_nearest_index,q_new,tree){
         var q_min = q_nearest;
-        var c_min = vector_distance(q_new,tree.vertices[0].vertex) + tree.vertices[q_nearest_index].cost;
+//        var c_min = vector_distance(q_new,tree.vertices[0].vertex) + tree.vertices[q_nearest_index].cost;
+	var c_min =Math.sqrt(Math.pow(q_new[0]-tree.vertices[0].vertex[0],2)+Math.pow(q_new[2]-tree.vertices[0].vertex[2],2)) +tree.vertices[q_nearest_index].cost;
+	
+
         for(var p=0;p<Q_near.length;p++){
 
                 var q_prime = steer(Q_near[p].vertex,q_new);
                if (kineval.poseIsCollision(q_prime)==false && (q_prime == q_new)){
 //                   if ((q_prime == q_new)){
                         //console.log("if");
-                        c_prime = Q_near[p].cost + vector_distance(q_new,tree.vertices[0].vertex);
-//              if ((vector_distance(tree.vertices[p].vertex,newnode.vertices[0].vertex)< radius) && tree.vertices[p].cost + vector_distance(tree.vertices[p].vertex,newnode.vertices[0].vertex)< nn.cost + vector_distance(nn.vertex,newnode.vertices[0].vertex)){
+//                        c_prime = Q_near[p].cost + vector_distance(q_new,tree.vertices[0].vertex);
+			c_prime = Q_near[p].cost + Math.sqrt(Math.pow(q_new[0]-tree.vertices[0].vertex[0],2)+Math.pow(q_new[2]-tree.vertices[0].vertex[2],2)) +tree.vertices[q_nearest_index].cost;
 
                         if ((c_prime < tree.vertices[tree.newest].cost) && (c_prime < c_min))
                                         q_min = Q_near[p].vertex;
@@ -696,8 +708,14 @@ function rewire(tree,Q_near,q_min,q_new){
 
         for (var i=0; i<Q_near.length;i++) {
         var q_prime = steer(q_new,Q_near[i].vertex);
-               if((kineval.poseIsCollision(q_prime)==false) && (q_prime == Q_near[i].vertex) &&(tree.vertices[tree.newest].cost+vector_distance(q_prime,tree.vertices[0].vertex)<Q_near[i].cost))
-          //        if((q_prime == Q_near[i].vertex) &&(tree.vertices[tree.newest].cost+vector_distance(q_prime,tree.vertices[0].vertex)<Q_near[i].cost))
+//               if((kineval.poseIsCollision(q_prime)==false) && (q_prime == Q_near[i].vertex) &&(tree.vertices[tree.newest].cost+vector_distance(q_prime,tree.vertices[0].vertex)<Q_near[i].cost))
+ 
+//	if((kineval.poseIsCollision(q_prime)==false) && (q_prime == Q_near[i].vertex) &&(tree.vertices[tree.newest].cost+vector_distance(q_prime,tree.vertices[0].vertex)<Q_near[i].cost))
+
+if ((kineval.poseIsCollision(q_prime)==false) && (q_prime == Q_near[i].vertex) && (tree.vertices[tree.newest].cost +Math.sqrt(Math.pow(q_new[0]-tree.vertices[0].vertex[0],2)+Math.pow(q_new[2]-tree.vertices[0].vertex[2],2))<Q_near[i].cost))
+
+
+         //        if((q_prime == Q_near[i].vertex) &&(tree.vertices[tree.newest].cost+vector_distance(q_prime,tree.vertices[0].vertex)<Q_near[i].cost))
                  Q_near[i].edges[0]=q_new;
         }
 
