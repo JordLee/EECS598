@@ -91,6 +91,7 @@ kineval.planMotionRRTConnect = function motionPlanningRRTConnect() {
 
 	console.log("geeting");
         // set robot pose from entry in planned robot path
+
         robot.origin.xyz = [
             kineval.motion_plan[kineval.motion_plan_traversal_index].vertex[0],
             kineval.motion_plan[kineval.motion_plan_traversal_index].vertex[1],
@@ -176,7 +177,7 @@ function robot_rrt_planner_iterate() {
 
     var i;
     if (typeof rrt_alg === 'undefined'){
-    rrt_alg =2 ;  // 0: basic rrt (OPTIONAL), 1: rrt_connect (REQUIRED) 2: rrt_*
+    rrt_alg =1 ;  // 0: basic rrt (OPTIONAL), 1: rrt_connect (REQUIRED) 2: rrt_*
     }		
    if (rrt_iterate && (Date.now()-cur_time > 10)) {
           cur_time = Date.now();
@@ -437,8 +438,10 @@ q_new[5] = q[5];
 	}
 
 
-	else if(tree.newest !==0 &&kineval.poseIsCollision(q_new)==false){
+	else if(tree.newest != 0 &&kineval.poseIsCollision(q_new)==false){
 //	console.log(robot_collision_forward_kinematics(q_new));
+
+	console.log("stuck");
 	return q_new
 	}
 //	else if(tree.newest !==0 &&robot_collision_forward_kinematics(q_new)!==false){

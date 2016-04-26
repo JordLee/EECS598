@@ -82,14 +82,14 @@ kineval.handleUserInput = function user_input() {
                 textbar.innerHTML = "moved robot backward along planned motion trajectory";
             }
         }
-    
+  
 	var vertice_object = kineval.motion_plan[kineval.motion_plan_traversal_index];
-	robot.origin_xyz[0] =vertice_object.vertex[0];
-	robot.origin_xyz[1] =vertice_object.vertex[1];
-	robot.origin_xyz[2] =vertice_object.vertex[2];
-	robot.origin_xyz[3] =vertice_object.vertex[3];
-	robot.origin_xyz[4] =vertice_object.vertex[4];
-	robot.origin_xyz[5] =vertice_object.vertex[5];
+	robot.origin.xyz[0] =vertice_object.vertex[0];
+	robot.origin.xyz[1] =vertice_object.vertex[1];
+	robot.origin.xyz[2] =vertice_object.vertex[2];
+	robot.origin.rpy[0] =vertice_object.vertex[3];
+	robot.origin.rpy[1] =vertice_object.vertex[4];
+	robot.origin.rpy[2] =vertice_object.vertex[5];
 
 	for (x in robot.joints) {
 
