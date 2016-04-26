@@ -11,11 +11,13 @@ Assignment 4: CHECK
   comment: robot does not follow heading and lateral directions
   error: joint rotation does not properly respond to user events
   regrade: working
-Assignment 5: DUE
+Assignment 5: CHECK
   error: endeffector does not converge to target for all tests
   warning: endeffector oscillates and overshoots producing jerky (3rd derivative) motion
   regrade: error: endeffector does not converge to target for all tests
   warning: endeffector oscillates and overshoots producing jerky (3rd derivative) motion
+  regrade2: working
+  comment: Fetch IK Random Trial Score: 13
 Assignment 6: DUE
   error: RRT Star planner not implemented
   error: planner does not return motion path solution
@@ -26,5 +28,5 @@ Assignment 6: DUE
 Assignment 7: CHECK
 
 
-Points: 75
+Points: 90
 Grade: PENDING
