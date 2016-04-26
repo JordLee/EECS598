@@ -178,7 +178,7 @@ function robot_rrt_planner_iterate() {
 
     var i;
     if (typeof rrt_alg === 'undefined'){
-    rrt_alg =1 ;  // 0: basic rrt (OPTIONAL), 1: rrt_connect (REQUIRED) 2: rrt_*
+    rrt_alg =2 ;  // 0: basic rrt (OPTIONAL), 1: rrt_connect (REQUIRED) 2: rrt_*
     }		
    if (rrt_iterate && (Date.now()-cur_time > 10)) {
           cur_time = Date.now();
