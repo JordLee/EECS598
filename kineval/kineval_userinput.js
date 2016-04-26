@@ -91,7 +91,7 @@ kineval.handleUserInput = function user_input() {
 	robot.origin.rpy[1] =vertice_object.vertex[4];
 	robot.origin.rpy[2] =vertice_object.vertex[5];
 
-	for (x in robot.joints) {
+	for (var x in robot.joints) {
 
             //console.log(kineval.motion_plan[kineval.motion_plan_traversal_index].vertex[q_names[x]]);
             robot.joints[x].angle = kineval.motion_plan[kineval.motion_plan_traversal_index].vertex[q_names[x]];

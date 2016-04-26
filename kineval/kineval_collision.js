@@ -38,7 +38,7 @@ kineval.robotIsCollision = function robot_iscollision() {
 
     // test for collision and change base color based on the result
    collision_result = kineval.poseIsCollision(q_robot_config);
-  // console.log(collision_result);
+   console.log(collision_result);
     robot.collision = collision_result;
 
 //    robot.collision = "elbow_flex_link";
@@ -67,13 +67,27 @@ kineval.poseIsCollision = function robot_collision_test(q) {
 
 function robot_collision_forward_kinematics(q) {
 var xyz = generate_translation_matrix(q[0], q[1], q[2]);
-var roty = generate_rotation_matrix_Y(q[5]);
-var rotx = generate_rotation_matrix_X(q[3]-Math.PI/2);
-var rotz = generate_rotation_matrix_Z(q[4]-Math.PI/2);
-var rotxyz = matrix_multiply_3(rotx,roty,rotz);
-var mstack = matrix_multiply(xyz,rotxyz);
+//var roty = generate_rotation_matrix_Y(q[5]);
+//var rotx = generate_rotation_matrix_X(q[3]-Math.PI/2);
+//var rotz = generate_rotation_matrix_Z(q[4]-Math.PI/2);
+//var rotxyz = matrix_multiply_3(rotx,roty,rotz);
+//var mstack = matrix_multiply(xyz,rotxyz);
 
 // traverseFKLinkCollision(mstack,robot.base,q);
+
+var rotx = generate_rotation_matrix_X(q[3]);
+var roty = generate_rotation_matrix_Y(q[4]);
+var rotz = generate_rotation_matrix_Z(q[5]);
+var rotxyz = matrix_multiply_3(rotz,roty,rotx);
+var offset_rot = matrix_multiply(generate_rotation_matrix_Y(-Math.PI/2),generate_rotation_matrix_X(-Math.PI/2));
+
+
+var mstack = matrix_multiply_3(xyz,rotxyz,offset_rot);
+
+
+
+
+
 
  return collision_FK_link(robot.links[robot.base],mstack,q);
 
@@ -181,10 +195,10 @@ function collision_FK_joint(j,mstack,q){
 
 //console.log(j);
 var xyz = generate_translation_matrix(j.origin.xyz[0], j.origin.xyz[1], j.origin.xyz[2]);
-var roty = generate_rotation_matrix_Y(j.origin.rpy[0]);
-var rotx = generate_rotation_matrix_X(j.origin.rpy[2]);
-var rotz = generate_rotation_matrix_Z(j.origin.rpy[1]);
-var rotxyz = matrix_multiply_3(rotx,roty,rotz);
+var roty = generate_rotation_matrix_Y(j.origin.rpy[1]);
+var rotx = generate_rotation_matrix_X(j.origin.rpy[0]);
+var rotz = generate_rotation_matrix_Z(j.origin.rpy[2]);
+var rotxyz = matrix_multiply_3(rotz,roty,rotx);
 var transform=matrix_multiply(xyz,rotxyz);
 
 

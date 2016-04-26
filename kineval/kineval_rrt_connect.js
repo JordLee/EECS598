@@ -111,7 +111,7 @@ kineval.planMotionRRTConnect = function motionPlanningRRTConnect() {
 	
 
         // KE 2 : need to move q_names into a global parameter
-        for (x in robot.joints) {
+        for (var x in robot.joints) {
       		
             //console.log(kineval.motion_plan[kineval.motion_plan_traversal_index].vertex[q_names[x]]);
             robot.joints[x].angle = kineval.motion_plan[kineval.motion_plan_traversal_index].vertex[q_names[x]];
@@ -137,11 +137,12 @@ kineval.robotRRTPlannerInit = function robot_rrt_planner_init() {
     q_names = {};  // store mapping between joint names and q DOFs
     q_index = [];  // store mapping between joint names and q DOFs
 
-    for (x in robot.joints) {
+    for (var x in robot.joints) {
         q_names[x] = q_start_config.length;
 	q_index[q_start_config.length] = x;
     
 	q_start_config[q_names[x]] = robot.joints[x].angle;
+//	q_start_config = q_start_config.concat(robot.joints[x].angle);
 	}
 
 	
@@ -177,7 +178,7 @@ function robot_rrt_planner_iterate() {
 
     var i;
     if (typeof rrt_alg === 'undefined'){
-    rrt_alg =1 ;  // 0: basic rrt (OPTIONAL), 1: rrt_connect (REQUIRED) 2: rrt_*
+    rrt_alg =2 ;  // 0: basic rrt (OPTIONAL), 1: rrt_connect (REQUIRED) 2: rrt_*
     }		
    if (rrt_iterate && (Date.now()-cur_time > 10)) {
           cur_time = Date.now();
@@ -420,6 +421,9 @@ q_new[5] = q[5];
 //	//q_new[q_names[x]]=2*(Math.random()-0.5)*(Math.PI); 
 	q_new[q_names[x]] = q[q_names[x]];
 	}
+
+
+//	console.log("stuck");
 //
 //}
 //else{
@@ -432,21 +436,22 @@ q_new[5] = q[5];
 //}
 //console.log("q_new");
 //console.log(q_new);
-	if (tree.newest == 0){
+//	if (tree.newest == 0){
 	
-	return q_new
-	}
+//	return q_new
+//	}
 
 
-	else if(tree.newest != 0 &&kineval.poseIsCollision(q_new)==false){
+	 if(kineval.poseIsCollision(q_new)==false){
 //	console.log(robot_collision_forward_kinematics(q_new));
 
-	console.log("stuck");
 	return q_new
 	}
 //	else if(tree.newest !==0 &&robot_collision_forward_kinematics(q_new)!==false){
+	else{
 //	new_config(tree,q,q_near);
-//	}
+	return false
+	}
 	
 
 }
@@ -477,21 +482,21 @@ var q_rand = [];
 //              [2*(Math.random()-0.5)*robot_boundary[0][2]],[0],[2*(Math.random()-0.5)*(Math.PI)],[0] ];
 //
 
-q_rand[0] =2*(Math.random()-0.5)*robot_boundary[0][0];
+q_rand[0] =robot_boundary[0][0]+Math.random()*(robot_boundary[1][0]-robot_boundary[0][0]);
 q_rand[1] = 0; 
-q_rand[2] = 2*(Math.random()-0.5)*robot_boundary[0][2]; 
+q_rand[2] = robot_boundary[0][2]+Math.random()*(robot_boundary[1][2]-robot_boundary[0][2]); 
 q_rand[3] = 0; 
-q_rand[4] = 2*(Math.random()-0.5)*(Math.PI); 
+q_rand[4] = 2*(Math.PI); 
 q_rand[5] = 0; 
 
 
 
 	for (x in robot.joints) {
 
-      	if (typeof robot.joints[x].limit ==='undefined')
-	q_rand[q_names[x]]=2*(Math.random()-0.5)*(Math.PI);
+      	if (typeof robot.joints[x].limit =='undefined')
+	q_rand[q_names[x]]=2*(Math.PI);
 	else
-	q_rand[q_names[x]] = Math.random()*(robot.joints[x].limit.lower-robot.joints[x].limit.upper)+robot.joints[x].limit.lower;
+	q_rand[q_names[x]] = Math.random()*(robot.joints[x].limit.upper-robot.joints[x].limit.lower)+robot.joints[x].limit.lower;
 //	robot.joints[x].limit[0]-robot.joints[x].limit[1]
 	//q_new[q_names[x]]=2*(Math.random()-0.5)*(Math.PI); 
 	}
