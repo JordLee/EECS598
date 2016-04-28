@@ -18,15 +18,18 @@ Assignment 5: CHECK
   warning: endeffector oscillates and overshoots producing jerky (3rd derivative) motion
   regrade2: working
   comment: Fetch IK Random Trial Score: 13
-Assignment 6: DUE
+Assignment 6: CHECK
   error: RRT Star planner not implemented
   error: planner does not return motion path solution
   comment: planner fails on public test barrier
   warning: base control does not properly respond to user input
   warning: joint cylinders do not render in alignment with joint axes
   warning: URL specified robot does not load at run time
+  regrade: working
+  warning: URL specified robot does not load at run time
+  warning: planner does not pass public test y
 Assignment 7: CHECK
 
 
-Points: 90
+Points: 105
 Grade: PENDING
